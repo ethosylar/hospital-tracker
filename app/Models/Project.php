@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Project extends Model
 {
@@ -59,4 +60,10 @@ class Project extends Model
     {
         return $this->belongsTo(\App\Models\User::class, 'owner_user_id');
     }
+	
+	public function files(): BelongsToMany
+	{
+		return $this->belongsToMany(\App\Models\StoredFile::class, 'dt_project_files', 'project_id','file_id')
+		->withTimestamps();
+	}
 }

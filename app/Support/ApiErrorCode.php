@@ -133,5 +133,13 @@
 		
 		public const USER_ROLE_SYNC_FAILED = 'USER_ROLE_SYNC_FAILED';
 		
-		
+		// ============================================================
+		// FileUpload (File) (dt_files)
+		// ============================================================		
+		public const FILE_UPLOAD_FAILED = 'FILE_UPLOAD_FAILED';
+		public const FILE_ATTACH_FAILED = 'FILE_ATTACH_FAILED';
+		public const FILE_DETACH_FAILED = 'FILE_DETACH_FAILED';
+		public const FILE_MOVE_FAILED = 'FILE_MOVE_FAILED';
+		public const FILE_NOT_LINKED = 'FILE_NOT_LINKED';
+		public const FILE_PHYSICAL_MISSING = 'FILE_PHYSICAL_MISSING';
 	}

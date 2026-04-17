@@ -3,6 +3,7 @@
 	namespace App\Models;
 	
 	use Illuminate\Database\Eloquent\Model;
+	use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 	
 	class ProjectTask extends Model
 	{
@@ -78,5 +79,11 @@
 		public function milestone()
 		{
 			return $this->belongsTo(ProjectMilestone::class, 'milestone_id');
+		}
+		
+		public function files()
+		{
+			return $this->belongsToMany(\App\Models\StoredFile::class, 'dt_task_files', 'task_id', 'file_id')
+			->withTimestamps();
 		}
 	}
