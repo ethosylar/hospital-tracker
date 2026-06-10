@@ -66,6 +66,9 @@
 		Route::get('/tasks/{task}/files', [FileController::class, 'taskIndex']);
 		Route::get('/tasks/{task}/files/{file}/download', [FileController::class, 'taskDownload']);
 		
+		Route::get('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'index']);
+Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'show']);
+		
 		/**
 			* PMO + PM write access (project operations)
 		*/

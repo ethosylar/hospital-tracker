@@ -29,6 +29,17 @@
 			'actual_end_date' => $this->actual_end_date?->format('Y-m-d'),
 			
 			'milestone_id' => $this->milestone_id ? (int)$this->milestone_id : null,
+			'milestone' => $this->whenLoaded('milestone', function () {
+                if (!$this->milestone) return null;
+
+                return [
+                    'id' => (int)$this->milestone->id,
+                    'project_id' => (int)$this->milestone->project_id,
+                    'name' => $this->milestone->name,
+                    'milestone_date' => $this->milestone->milestone_date?->format('Y-m-d'),
+                    'status' => $this->milestone->status,
+                ];
+            }),
 			
 			'duration' => (int)($this->duration ?? 0),
 			

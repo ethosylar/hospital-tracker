@@ -142,4 +142,12 @@
 		public const FILE_MOVE_FAILED = 'FILE_MOVE_FAILED';
 		public const FILE_NOT_LINKED = 'FILE_NOT_LINKED';
 		public const FILE_PHYSICAL_MISSING = 'FILE_PHYSICAL_MISSING';
+		
+		// ============================================================
+		// Project Budget Line (File) (dt_project_budget_line)
+		// ============================================================	
+		public const PROJECT_BUDGET_LINE_CREATE_FAILED = 'PROJECT_BUDGET_LINE_CREATE_FAILED';
+		public const PROJECT_BUDGET_LINE_UPDATE_FAILED = 'PROJECT_BUDGET_LINE_UPDATE_FAILED';
+		public const PROJECT_BUDGET_LINE_DELETE_FAILED = 'PROJECT_BUDGET_LINE_DELETE_FAILED';
+		public const PROJECT_BUDGET_LINE_DUPLICATE_CODE = 'PROJECT_BUDGET_LINE_DUPLICATE_CODE';
 	}

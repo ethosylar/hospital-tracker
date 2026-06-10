@@ -13,6 +13,7 @@ class DashboardOverviewResource extends JsonResource
             'counts' => $this->resource['counts'],
             'delayed_projects' => ProjectMiniResource::collection($this->resource['delayed_projects']),
             'upcoming_milestones' => MilestoneMiniResource::collection($this->resource['upcoming_milestones']),
+			'budget' => $this['budget'] ?? null,
             'charts' => [
                 'projects_by_status' => ChartItemResource::collection($this->resource['charts']['projects_by_status']),
                 'projects_by_department' => ChartItemResource::collection($this->resource['charts']['projects_by_department']),
