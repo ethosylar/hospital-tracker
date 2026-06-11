@@ -11,6 +11,7 @@
 	use App\Models\ProjectMilestone;
 	use Illuminate\Http\Request;
 	use Illuminate\Validation\ValidationException;
+	use Illuminate\Support\Facades\DB;
 	
 	class ProjectTaskController extends Controller
 	{
@@ -30,6 +31,13 @@
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
+			
+			$taskIds = $tasks->pluck('id')->map(fn($v) => (int)$v)->all();
+			$budgetByTask = $this->budgetSumsForTasks((int)$project, $taskIds);
+			
+			$tasks->each(function ($t) use ($budgetByTask) {
+				$t->setAttribute('budget', $budgetByTask[(int)$t->id] ?? $this->emptyBudget());
+			});
 			
 			return response()->json([
             'project_id' => (int)$project,
@@ -262,5 +270,78 @@
 			
 			// inclusive days (16 -> 27 = 12 days)
 			return $s->diffInDays($e) + 1;
+		}
+		
+		private function emptyBudget(): array
+		{
+			return [
+			'planned_cost' => 0.0,
+			'actual_cost' => 0.0,
+			'committed_cost' => 0.0,
+			'spent_cost' => 0.0,       // actual + committed
+			
+			'planned_funding' => 0.0,
+			'actual_funding' => 0.0,
+			'committed_funding' => 0.0,
+			'received_funding' => 0.0, // actual + committed
+			
+			'net_spent' => 0.0,        // received_funding - spent_cost
+			];
+		}
+		
+		/**
+			* Summarize allocations per task (1 query, no N+1).
+			* Assumes:
+			*  - dt_project_budget_allocations: project_id, budget_line_id, task_id, planned_amount, actual_amount, committed_amount
+			*  - dt_project_budget_lines: id, line_type ('COST'|'FUNDING')
+		*/
+		private function budgetSumsForTasks(int $projectId, array $taskIds): array
+		{
+			if (empty($taskIds)) return [];
+			
+			$rows = DB::table('dt_project_budget_allocations as a')
+			->join('dt_project_budget_lines as l', 'l.id', '=', 'a.budget_line_id')
+			->where('a.project_id', $projectId)
+			->whereIn('a.task_id', $taskIds)
+			->whereNotNull('a.task_id')
+			->selectRaw('a.task_id as task_id')
+			->selectRaw("SUM(CASE WHEN l.line_type='COST' THEN a.planned_amount ELSE 0 END) as planned_cost")
+			->selectRaw("SUM(CASE WHEN l.line_type='COST' THEN a.actual_amount ELSE 0 END) as actual_cost")
+			->selectRaw("SUM(CASE WHEN l.line_type='COST' THEN a.committed_amount ELSE 0 END) as committed_cost")
+			->selectRaw("SUM(CASE WHEN l.line_type='FUNDING' THEN a.planned_amount ELSE 0 END) as planned_funding")
+			->selectRaw("SUM(CASE WHEN l.line_type='FUNDING' THEN a.actual_amount ELSE 0 END) as actual_funding")
+			->selectRaw("SUM(CASE WHEN l.line_type='FUNDING' THEN a.committed_amount ELSE 0 END) as committed_funding")
+			->groupBy('a.task_id')
+			->get();
+			
+			$out = [];
+			foreach ($rows as $r) {
+				$plannedCost = (float)$r->planned_cost;
+				$actualCost = (float)$r->actual_cost;
+				$commCost = (float)$r->committed_cost;
+				
+				$plannedFund = (float)$r->planned_funding;
+				$actualFund = (float)$r->actual_funding;
+				$commFund = (float)$r->committed_funding;
+				
+				$spentCost = $actualCost + $commCost;
+				$recvFund = $actualFund + $commFund;
+				
+				$out[(int)$r->task_id] = [
+				'planned_cost' => $plannedCost,
+				'actual_cost' => $actualCost,
+				'committed_cost' => $commCost,
+				'spent_cost' => $spentCost,
+				
+				'planned_funding' => $plannedFund,
+				'actual_funding' => $actualFund,
+				'committed_funding' => $commFund,
+				'received_funding' => $recvFund,
+				
+				'net_spent' => $recvFund - $spentCost,
+				];
+			}
+			
+			return $out;
 		}
 	}

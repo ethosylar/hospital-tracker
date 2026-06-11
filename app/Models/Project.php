@@ -22,6 +22,10 @@
         'start_date',
         'target_end_date',
         'actual_end_date',
+		'project_category_id',
+		'planned_progress',
+		'actual_start_date',
+		'notes',
 		'currency_code',
 		'planned_cost_total',
 		'actual_cost_total',
@@ -43,6 +47,8 @@
 		'planned_funding_total' => 'decimal:2',
 		'actual_funding_total' => 'decimal:2',
 		'budget_updated_at' => 'datetime',
+		'planned_progress' => 'integer',
+		'actual_start_date' => 'date:Y-m-d',
 		];
 		
 		public function milestones()
@@ -84,5 +90,10 @@
 		public function budgetLines()
 		{
 			return $this->hasMany(\App\Models\ProjectBudgetLine::class, 'project_id');
+		}
+		
+		public function category()
+		{
+			return $this->belongsTo(ProjectCategory::class, 'project_category_id');
 		}
 	}

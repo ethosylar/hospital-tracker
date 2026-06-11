@@ -56,6 +56,17 @@
                 ] : null;
 			}),
 			
+			'project_category_id' => $this->project_category_id ? (int)$this->project_category_id : null,
+			'category_code' => $this->whenLoaded('category', fn() => $this->category?->code),
+			'category_name' => $this->whenLoaded('category', fn() => $this->category?->name),
+			
+			'planned_progress' => (int)($this->planned_progress ?? 0),   // Estimated Progress (%)
+			'progress' => (int)($this->progress ?? 0),                   // Actual Progress (%)
+			
+			'actual_start_date' => $this->actual_start_date?->format('Y-m-d'),
+			'target_end_date'   => $this->target_end_date?->format('Y-m-d'),
+			'notes' => $this->notes,
+			
 			//New Finance Section
 			'currency_code' => $this->currency_code,
 			'planned_cost_total' => (float)($this->planned_cost_total ?? 0),

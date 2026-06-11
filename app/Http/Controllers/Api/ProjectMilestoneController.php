@@ -9,6 +9,7 @@
 	use App\Models\Project;
 	use App\Models\ProjectMilestone;
 	use Illuminate\Http\Request;
+	use Illuminate\Support\Facades\DB;
 	
 	class ProjectMilestoneController extends Controller
 	{
@@ -38,6 +39,13 @@
 			
 			$p = $q->orderBy('milestone_date')->orderBy('id')->paginate($perPage);
 			
+			$milestoneIds = $p->getCollection()->pluck('id')->map(fn($v) => (int)$v)->all();
+			$budgetByMilestone = $this->budgetSumsForMilestonesViaTasks((int)$project->id, $milestoneIds);
+			
+			$p->getCollection()->each(function ($m) use ($budgetByMilestone) {
+				$m->setAttribute('budget', $budgetByMilestone[(int)$m->id] ?? $this->emptyBudget());
+			});
+			
 			return ProjectMilestoneResources::collection($p);
 		}
 		
@@ -48,6 +56,9 @@
 			if ((int)$milestone->project_id !== (int)$project->id) {
 				abort(404);
 			}
+			
+			$budgetByMilestone = $this->budgetSumsForMilestonesViaTasks((int)$project->id, [(int)$milestone->id]);
+			$milestone->setAttribute('budget', $budgetByMilestone[(int)$milestone->id] ?? $this->emptyBudget());
 			
 			return new ProjectMilestoneResources($milestone);
 		}
@@ -142,5 +153,70 @@
 			);
 			
 			return response()->json(['ok' => true, 'mode' => 'HARD']);
+		}
+		
+		private function emptyBudget(): array
+		{
+			return [
+			'planned_cost' => 0.0,
+			'actual_cost' => 0.0,
+			'committed_cost' => 0.0,
+			'spent_cost' => 0.0,
+			'planned_funding' => 0.0,
+			'actual_funding' => 0.0,
+			'committed_funding' => 0.0,
+			'received_funding' => 0.0,
+			'net_spent' => 0.0,
+			];
+		}
+		
+		/**
+			* Milestone budget = sum of allocations on tasks linked to this milestone.
+			* (works even if you never allocate directly to milestone_id)
+		*/
+		private function budgetSumsForMilestonesViaTasks(int $projectId, array $milestoneIds): array
+		{
+			if (empty($milestoneIds)) return [];
+			
+			$rows = DB::table('dt_project_tasks as t')
+			->join('dt_project_budget_allocations as a', 'a.task_id', '=', 't.id')
+			->join('dt_project_budget_lines as l', 'l.id', '=', 'a.budget_line_id')
+			->where('t.project_id', $projectId)
+			->whereIn('t.milestone_id', $milestoneIds)
+			->whereNotNull('t.milestone_id')
+			->selectRaw('t.milestone_id as milestone_id')
+			->selectRaw("SUM(CASE WHEN l.line_type='COST' THEN a.planned_amount ELSE 0 END) as planned_cost")
+			->selectRaw("SUM(CASE WHEN l.line_type='COST' THEN a.actual_amount ELSE 0 END) as actual_cost")
+			->selectRaw("SUM(CASE WHEN l.line_type='COST' THEN a.committed_amount ELSE 0 END) as committed_cost")
+			->selectRaw("SUM(CASE WHEN l.line_type='FUNDING' THEN a.planned_amount ELSE 0 END) as planned_funding")
+			->selectRaw("SUM(CASE WHEN l.line_type='FUNDING' THEN a.actual_amount ELSE 0 END) as actual_funding")
+			->selectRaw("SUM(CASE WHEN l.line_type='FUNDING' THEN a.committed_amount ELSE 0 END) as committed_funding")
+			->groupBy('t.milestone_id')
+			->get();
+			
+			$out = [];
+			foreach ($rows as $r) {
+				$actualCost = (float)$r->actual_cost;
+				$commCost = (float)$r->committed_cost;
+				$actualFund = (float)$r->actual_funding;
+				$commFund = (float)$r->committed_funding;
+				
+				$spentCost = $actualCost + $commCost;
+				$recvFund = $actualFund + $commFund;
+				
+				$out[(int)$r->milestone_id] = [
+				'planned_cost' => (float)$r->planned_cost,
+				'actual_cost' => $actualCost,
+				'committed_cost' => $commCost,
+				'spent_cost' => $spentCost,
+				'planned_funding' => (float)$r->planned_funding,
+				'actual_funding' => $actualFund,
+				'committed_funding' => $commFund,
+				'received_funding' => $recvFund,
+				'net_spent' => $recvFund - $spentCost,
+				];
+			}
+			
+			return $out;
 		}
 	}

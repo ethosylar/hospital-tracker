@@ -13,7 +13,9 @@
 		
 		public function rules(): array
 		{
-			$id = $this->route('project');
+			// $id = $this->route('project');
+			$routeProject = $this->route('project');
+			$id = $routeProject instanceof Project ? $routeProject->id : $routeProject;
 			
 			return [
             'code' => ['sometimes','string','max:50',"unique:dt_projects,code,{$id}"],
@@ -31,6 +33,11 @@
             'start_date' => ['nullable','date'],
             'target_end_date' => ['nullable','date'],
             'actual_end_date' => ['nullable','date'],
+			
+			'project_category_id' => ['sometimes','nullable','integer','exists:lt_project_categories,id'],
+			'planned_progress'    => ['sometimes','nullable','integer','min:0','max:100'],
+			'actual_start_date'   => ['sometimes','nullable','date'],
+			'notes'               => ['sometimes','nullable','string'],
 			
 			'currency_code' => ['sometimes','nullable','string','size:3'],
 			'planned_cost_total' => ['sometimes','nullable','numeric','min:0'],

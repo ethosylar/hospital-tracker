@@ -7,6 +7,7 @@
 		ProjectController,
 		ProjectTaskController,
 		ProjectMilestoneController,
+		ProjectBudgetLineController,
 		ExternalRiskIssueController,
 		DashboardController,
 		LookupController,
@@ -21,7 +22,9 @@
 		PriorityController,
 		ExternalSourceController,
 		RiskIssueTypeController,
-		FileController
+		FileController,
+		ProjectCategoryController,
+		ProjectBudgetAllocationController
 	};
 	
 	use App\Http\Controllers\AuthController;
@@ -67,7 +70,7 @@
 		Route::get('/tasks/{task}/files/{file}/download', [FileController::class, 'taskDownload']);
 		
 		Route::get('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'index']);
-Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'show']);
+		Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'show']);
 		
 		/**
 			* PMO + PM write access (project operations)
@@ -102,6 +105,16 @@ Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineControll
 			Route::delete('/tasks/{task}/files/{file}', [FileController::class, 'taskDetach']);
 			
 			Route::post('/tasks/{task}/files/{file}/move', [FileController::class, 'taskMove']);
+			
+			Route::get('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'index']);
+			Route::post('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'store']);
+			Route::get('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'show']);
+			Route::put('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'update']);
+			Route::delete('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'destroy']);
+			
+			Route::post('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'store']);
+			Route::put('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'update']);
+			Route::delete('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'destroy']);
 			
 		});
 		
@@ -140,6 +153,18 @@ Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineControll
 			Route::put('/roles/{role}', [RoleController::class, 'update']);
 			Route::delete('/roles/{role}', [RoleController::class, 'destroy']);
 			
+			// Budget Allocations
+			Route::get('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'index']);
+			Route::post('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'store']);
+			Route::get('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'show']);
+			Route::put('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'update']);
+			Route::delete('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'destroy']);
+			
+			//Budget Lines
+			Route::post('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'store']);
+			Route::put('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'update']);
+			Route::delete('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'destroy']);
+			
 			// Status / lookup maintenance
 			Route::apiResource('project-statuses', ProjectStatusController::class)->parameters(['project-statuses' => 'status'])->except(['create','edit']);
 			Route::apiResource('task-statuses', TaskStatusController::class)->parameters(['task-statuses' => 'status'])->except(['create','edit']);
@@ -148,5 +173,6 @@ Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineControll
 			Route::apiResource('priorities', PriorityController::class)->except(['create','edit']);
 			Route::apiResource('external-sources', ExternalSourceController::class)->parameters(['external-sources' => 'source'])->except(['create','edit']);
 			Route::apiResource('risk-issue-types', RiskIssueTypeController::class)->parameters(['risk-issue-types' => 'type'])->except(['create','edit']);
+			Route::apiResource('project-categories', ProjectCategoryController::class)->except(['create','edit']);
 		});
 	});

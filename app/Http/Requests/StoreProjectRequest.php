@@ -30,6 +30,10 @@
             'start_date' => ['nullable','date'],
             'target_end_date' => ['nullable','date'],
             'actual_end_date' => ['nullable','date'],
+			'project_category_id' => ['nullable','integer','exists:lt_project_categories,id'],
+			'planned_progress'    => ['nullable','integer','min:0','max:100'],
+			'actual_start_date'   => ['nullable','date'],
+			'notes'               => ['nullable','string'],
 			
 			'currency_code' => ['nullable','string','size:3'],
 			'planned_cost_total' => ['nullable','numeric','min:0'],

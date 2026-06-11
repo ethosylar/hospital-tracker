@@ -28,4 +28,9 @@
 		{
 			return $this->hasMany(ProjectTask::class, 'milestone_id');
 		}
+		
+		public function budgetAllocations()
+		{
+			return $this->hasMany(\App\Models\ProjectBudgetAllocation::class, 'milestone_id');
+		}
 	}

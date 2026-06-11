@@ -86,4 +86,9 @@
 			return $this->belongsToMany(\App\Models\StoredFile::class, 'dt_task_files', 'task_id', 'file_id')
 			->withTimestamps();
 		}
+		
+		public function budgetAllocations()
+		{
+			return $this->hasMany(\App\Models\ProjectBudgetAllocation::class, 'task_id');
+		}
 	}

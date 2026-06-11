@@ -8,6 +8,19 @@
 	{
 		public function toArray($request): array
 		{
+			
+			$budget = $this->getAttribute('budget') ?? [
+			'planned_cost' => 0.0,
+			'actual_cost' => 0.0,
+			'committed_cost' => 0.0,
+			'spent_cost' => 0.0,
+			'planned_funding' => 0.0,
+			'actual_funding' => 0.0,
+			'committed_funding' => 0.0,
+			'received_funding' => 0.0,
+			'net_spent' => 0.0,
+			];
+			
 			return [
 			'id' => (int)$this->id,
 			'project_id' => (int)$this->project_id,
@@ -31,19 +44,21 @@
 			'milestone_id' => $this->milestone_id ? (int)$this->milestone_id : null,
 			'milestone' => $this->whenLoaded('milestone', function () {
                 if (!$this->milestone) return null;
-
+				
                 return [
-                    'id' => (int)$this->milestone->id,
-                    'project_id' => (int)$this->milestone->project_id,
-                    'name' => $this->milestone->name,
-                    'milestone_date' => $this->milestone->milestone_date?->format('Y-m-d'),
-                    'status' => $this->milestone->status,
+				'id' => (int)$this->milestone->id,
+				'project_id' => (int)$this->milestone->project_id,
+				'name' => $this->milestone->name,
+				'milestone_date' => $this->milestone->milestone_date?->format('Y-m-d'),
+				'status' => $this->milestone->status,
                 ];
-            }),
+			}),
 			
 			'duration' => (int)($this->duration ?? 0),
 			
 			'sort_order' => (int)($this->sort_order ?? 0),
+			
+			'budget' => $budget,
 			
 			'task_status_id' => (int)$this->task_status_id,
 			'status_code' => $this->whenLoaded('status', fn() => $this->status?->code),

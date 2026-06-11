@@ -33,4 +33,9 @@
 		{
 			return $this->belongsTo(Project::class, 'project_id');
 		}
-	}	
+		
+		public function allocations()
+		{
+			return $this->hasMany(\App\Models\ProjectBudgetAllocation::class, 'budget_line_id');
+		}
+	}		
