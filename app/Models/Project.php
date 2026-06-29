@@ -96,4 +96,32 @@
 		{
 			return $this->belongsTo(ProjectCategory::class, 'project_category_id');
 		}
+		
+		public function permitLinks()
+		{
+			return $this->hasMany(
+			\App\Models\ProjectPermitLink::class,
+			'project_id'
+			);
+		}
+		
+		public function externalPermits()
+		{
+			return $this->belongsToMany(
+			\App\Models\ExternalPermit::class,
+			'dt_project_permit_links',
+			'project_id',
+			'permit_id'
+			)
+			->wherePivot('is_active', true)
+			->withPivot([
+            'id',
+            'task_id',
+            'linked_by_user_id',
+            'linked_at',
+            'notes',
+            'is_active',
+			])
+			->withTimestamps();
+		}
 	}

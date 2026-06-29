@@ -172,6 +172,15 @@
 		
 		public const PROJECT_BUDGET_ALLOC_EXCEEDS_LINE_TOTAL = 'PROJECT_BUDGET_ALLOC_EXCEEDS_LINE_TOTAL';
 		
-		
+		// ============================================================
+		// External Source i.e. ePTW Integration (dt_integration_sync_runs, dt_project_permit_links, dt_external_permits)
+		// ============================================================
+		public const EPTW_SOURCE_NOT_CONFIGURED ='EPTW_SOURCE_NOT_CONFIGURED';
+		public const EPTW_IMPORT_FAILED ='EPTW_IMPORT_FAILED';
+		public const EPTW_PERMIT_LINK_CREATE_FAILED ='EPTW_PERMIT_LINK_CREATE_FAILED';
+		public const EPTW_PERMIT_LINK_DELETE_FAILED ='EPTW_PERMIT_LINK_DELETE_FAILED';
+		public const EPTW_PERMIT_LINKED_TO_ANOTHER_PROJECT ='EPTW_PERMIT_LINKED_TO_ANOTHER_PROJECT';
+		public const EPTW_TASK_PROJECT_MISMATCH ='EPTW_TASK_PROJECT_MISMATCH';
+		public const EPTW_PERMIT_SOURCE_DELETED ='EPTW_PERMIT_SOURCE_DELETED';
 		
 	}

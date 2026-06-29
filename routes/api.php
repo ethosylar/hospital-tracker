@@ -24,7 +24,11 @@
 		RiskIssueTypeController,
 		FileController,
 		ProjectCategoryController,
-		ProjectBudgetAllocationController
+		ProjectBudgetAllocationController,
+		ExternalPermitController,
+		ProjectPermitLinkController,
+		EptwImportController,
+		IntegrationSyncRunController
 	};
 	
 	use App\Http\Controllers\AuthController;
@@ -71,6 +75,17 @@
 		
 		Route::get('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'index']);
 		Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'show']);
+		
+		/*
+			|--------------------------------------------------------------------------
+			| ePTW permit read endpoints
+			|--------------------------------------------------------------------------
+		*/
+		Route::get('/external-permits',[ExternalPermitController::class, 'index']);
+		Route::get('/external-permits/{permit}',[ExternalPermitController::class, 'show']);
+		Route::get('/projects/{project}/permits',[ExternalPermitController::class, 'projectIndex']);
+		Route::get('/tasks/{task}/permits',[ExternalPermitController::class, 'taskIndex']);
+		Route::get('/projects/{project}/milestones/{milestone}/permits',[ExternalPermitController::class, 'milestoneIndex']);
 		
 		/**
 			* PMO + PM write access (project operations)
@@ -124,6 +139,8 @@
 		Route::middleware('role:AUDITOR,ADMIN')->group(function () {
 			Route::get('/audit-logs', [AuditLogController::class, 'index']);
 			Route::get('/audit-logs/{id}', [AuditLogController::class, 'show']);
+			Route::get('/integrations/eptw/sync-runs',[IntegrationSyncRunController::class, 'index']);
+			Route::get('/integrations/eptw/sync-runs/{run}',[IntegrationSyncRunController::class, 'show']);
 		});
 		
 		/**
@@ -174,5 +191,13 @@
 			Route::apiResource('external-sources', ExternalSourceController::class)->parameters(['external-sources' => 'source'])->except(['create','edit']);
 			Route::apiResource('risk-issue-types', RiskIssueTypeController::class)->parameters(['risk-issue-types' => 'type'])->except(['create','edit']);
 			Route::apiResource('project-categories', ProjectCategoryController::class)->except(['create','edit']);
+			
+			//Test Import Route
+			Route::post('/integrations/eptw/import-test',[EptwImportController::class, 'store']);
+		});
+		
+		Route::middleware('role:PMO,PM,ADMIN')->group(function () {
+			Route::post('/projects/{project}/permit-links',[ProjectPermitLinkController::class, 'store']);
+			Route::delete('/projects/{project}/permit-links/{link}',[ProjectPermitLinkController::class, 'destroy']);
 		});
 	});
