@@ -183,4 +183,10 @@
 		public const EPTW_TASK_PROJECT_MISMATCH ='EPTW_TASK_PROJECT_MISMATCH';
 		public const EPTW_PERMIT_SOURCE_DELETED ='EPTW_PERMIT_SOURCE_DELETED';
 		
+		// ============================================================
+		// Permission Based Role Access (lt_role_permissions, lt_permissions)
+		// ============================================================		
+		public const UNAUTHENTICATED = 'UNAUTHENTICATED';
+		public const FORBIDDEN = 'FORBIDDEN';
+		
 	}

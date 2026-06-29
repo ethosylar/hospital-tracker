@@ -35,82 +35,100 @@
 	
 	Route::get('/health', fn () => response()->json(['ok' => true, 'message' => 'API is working']));
 	
-	/**
-		* Auth
+	/*
+		|--------------------------------------------------------------------------
+		| Authentication
+		|--------------------------------------------------------------------------
 	*/
 	Route::post('/login', [AuthController::class, 'login']);
 	
 	Route::middleware('auth:sanctum')->group(function () {
 		Route::post('/logout', [AuthController::class, 'logout']);
-		//Route::get('/me', fn (Request $request) => $request->user());
 		Route::get('/me', [AuthController::class, 'me']);
-		
-		/**
-			* Common (all authenticated users: Admin, Auditor, PMO, PM, Staff)
-		*/
-		Route::get('/dashboard/overview', [DashboardController::class, 'overview']);
-		Route::get('/lookups', [LookupController::class, 'index']);
-		
-		/**
-			* Projects - READ for all authenticated users
-		*/
-		Route::get('/projects', [ProjectController::class, 'index']);
-		Route::get('/projects/{project}', [ProjectController::class, 'show']);
-		Route::get('/projects/{project}/gantt', [ProjectTaskController::class, 'gantt']);
-		
-		// Milestones - READ for all authenticated users
-		Route::get('/projects/{project}/milestones', [ProjectMilestoneController::class, 'index']);
-		Route::get('/projects/{project}/milestones/{milestone}', [ProjectMilestoneController::class, 'show']);
-		
-		// External Risk Issues - READ for all authenticated users (optional, but usually useful)
-		Route::get('/external-risk-issues', [ExternalRiskIssueController::class, 'index']);
-		Route::get('/external-risk-issues/{issue}', [ExternalRiskIssueController::class, 'show']);
-		
-		// File for Upload, Update, Move & Delete
-		Route::get('/projects/{project}/files', [FileController::class, 'projectIndex']);
-		Route::get('/projects/{project}/files/{file}/download', [FileController::class, 'projectDownload']);
-		
-		Route::get('/tasks/{task}/files', [FileController::class, 'taskIndex']);
-		Route::get('/tasks/{task}/files/{file}/download', [FileController::class, 'taskDownload']);
-		
-		Route::get('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'index']);
-		Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'show']);
 		
 		/*
 			|--------------------------------------------------------------------------
-			| ePTW permit read endpoints
+			| Dashboard
 			|--------------------------------------------------------------------------
 		*/
-		Route::get('/external-permits',[ExternalPermitController::class, 'index']);
-		Route::get('/external-permits/{permit}',[ExternalPermitController::class, 'show']);
-		Route::get('/projects/{project}/permits',[ExternalPermitController::class, 'projectIndex']);
-		Route::get('/tasks/{task}/permits',[ExternalPermitController::class, 'taskIndex']);
-		Route::get('/projects/{project}/milestones/{milestone}/permits',[ExternalPermitController::class, 'milestoneIndex']);
+		Route::middleware('permission:dashboard.view')->group(function () {
+			Route::get('/dashboard/overview', [DashboardController::class, 'overview']);
+		});
 		
-		/**
-			* PMO + PM write access (project operations)
+		/*
+			|--------------------------------------------------------------------------
+			| Projects Read
+			|--------------------------------------------------------------------------
 		*/
-		Route::middleware('role:PMO,PM')->group(function () {
-			// Projects
+		Route::middleware('permission:projects.read')->group(function () {
+			Route::get('/projects', [ProjectController::class, 'index']);
+			Route::get('/projects/{project}', [ProjectController::class, 'show']);
+			Route::get('/projects/{project}/gantt', [ProjectTaskController::class, 'gantt']);
+			
+			Route::get('/projects/{project}/milestones', [ProjectMilestoneController::class, 'index']);
+			Route::get('/projects/{project}/milestones/{milestone}', [ProjectMilestoneController::class, 'show']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Projects Write
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:projects.write')->group(function () {
 			Route::post('/projects', [ProjectController::class, 'store']);
 			Route::put('/projects/{project}', [ProjectController::class, 'update']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Projects Delete
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:projects.delete')->group(function () {
 			Route::delete('/projects/{project}', [ProjectController::class, 'destroy']);
-			
-			// Tasks
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Task Write
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:tasks.write')->group(function () {
 			Route::post('/projects/{project}/tasks', [ProjectTaskController::class, 'store']);
 			Route::put('/tasks/{task}', [ProjectTaskController::class, 'update']);
 			Route::delete('/tasks/{task}', [ProjectTaskController::class, 'destroy']);
-			
-			// Milestones write
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Milestone Write
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:milestones.write')->group(function () {
 			Route::post('/projects/{project}/milestones', [ProjectMilestoneController::class, 'store']);
 			Route::put('/projects/{project}/milestones/{milestone}', [ProjectMilestoneController::class, 'update']);
 			Route::delete('/projects/{project}/milestones/{milestone}', [ProjectMilestoneController::class, 'destroy']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Files Read
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:files.read')->group(function () {
+			Route::get('/projects/{project}/files', [FileController::class, 'projectIndex']);
+			Route::get('/projects/{project}/files/{file}/download', [FileController::class, 'projectDownload']);
 			
-			// External Risk Issue write (if PMO/PM manage them)
-			Route::post('/external-risk-issues', [ExternalRiskIssueController::class, 'store']);
-			Route::put('/external-risk-issues/{issue}', [ExternalRiskIssueController::class, 'update']);
-			Route::delete('/external-risk-issues/{issue}', [ExternalRiskIssueController::class, 'destroy']);
-			
+			Route::get('/tasks/{task}/files', [FileController::class, 'taskIndex']);
+			Route::get('/tasks/{task}/files/{file}/download', [FileController::class, 'taskDownload']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Files Write
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:files.write')->group(function () {
 			Route::post('/projects/{project}/files', [FileController::class, 'projectUpload']);
 			Route::post('/projects/{project}/files/attach', [FileController::class, 'projectAttach']);
 			Route::delete('/projects/{project}/files/{file}', [FileController::class, 'projectDetach']);
@@ -118,86 +136,179 @@
 			Route::post('/tasks/{task}/files', [FileController::class, 'taskUpload']);
 			Route::post('/tasks/{task}/files/attach', [FileController::class, 'taskAttach']);
 			Route::delete('/tasks/{task}/files/{file}', [FileController::class, 'taskDetach']);
-			
 			Route::post('/tasks/{task}/files/{file}/move', [FileController::class, 'taskMove']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Budget Read
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:budget.read')->group(function () {
+			Route::get('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'index']);
+			Route::get('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'show']);
 			
 			Route::get('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'index']);
-			Route::post('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'store']);
 			Route::get('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'show']);
-			Route::put('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'update']);
-			Route::delete('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'destroy']);
-			
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Budget Write
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:budget.write')->group(function () {
 			Route::post('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'store']);
 			Route::put('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'update']);
 			Route::delete('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'destroy']);
 			
+			Route::post('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'store']);
+			Route::put('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'update']);
+			Route::delete('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'destroy']);
 		});
 		
-		/**
-			* Auditor + Admin: audit logs
+		/*
+			|--------------------------------------------------------------------------
+			| ePTW Routing
+			|--------------------------------------------------------------------------
 		*/
-		Route::middleware('role:AUDITOR,ADMIN')->group(function () {
+		/*
+			|--------------------------------------------------------------------------
+			| Permit Read
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:permits.read')->group(function () {
+			Route::get('/external-permits', [ExternalPermitController::class, 'index']);
+			Route::get('/external-permits/{permit}', [ExternalPermitController::class, 'show']);
+			Route::get('/projects/{project}/permits', [ExternalPermitController::class, 'projectIndex']);
+			Route::get('/tasks/{task}/permits', [ExternalPermitController::class, 'taskIndex']);
+			Route::get('/projects/{project}/milestones/{milestone}/permits', [ExternalPermitController::class, 'milestoneIndex']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Permit Link
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:permits.link')->group(function () {
+			Route::post('/projects/{project}/permit-links', [ProjectPermitLinkController::class, 'store']);
+			Route::delete('/projects/{project}/permit-links/{link}', [ProjectPermitLinkController::class, 'destroy']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Permit Sync
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:permits.sync')->group(function () {
+			Route::post('/integrations/eptw/import-test', [EptwImportController::class, 'store']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Auditor
+			|--------------------------------------------------------------------------
+		*/
+		/*
+			|--------------------------------------------------------------------------
+			| Audit View
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:audit.view')->group(function () {
 			Route::get('/audit-logs', [AuditLogController::class, 'index']);
 			Route::get('/audit-logs/{id}', [AuditLogController::class, 'show']);
-			Route::get('/integrations/eptw/sync-runs',[IntegrationSyncRunController::class, 'index']);
-			Route::get('/integrations/eptw/sync-runs/{run}',[IntegrationSyncRunController::class, 'show']);
+			
+			Route::get('/integrations/eptw/sync-runs', [IntegrationSyncRunController::class, 'index']);
+			Route::get('/integrations/eptw/sync-runs/{run}', [IntegrationSyncRunController::class, 'show']);
 		});
 		
-		/**
-			* Admin only: user/role/department + lookup master data maintenance
+		/*
+			|--------------------------------------------------------------------------
+			| Admin Section
+			|--------------------------------------------------------------------------
 		*/
-		Route::middleware('role:ADMIN')->group(function () {
-			
-			// Users + role assignment
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Users Manage
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:users.manage')->group(function () {
 			Route::get('/users', [UserController::class, 'index']);
 			Route::post('/users', [UserController::class, 'store']);
 			Route::get('/users/{user}', [UserController::class, 'show']);
 			Route::put('/users/{user}', [UserController::class, 'update']);
 			Route::delete('/users/{user}', [UserController::class, 'destroy']);
 			Route::put('/users/{user}/roles', [UserController::class, 'syncRoles']);
-			
-			// Departments
-			Route::get('/departments', [DepartmentController::class, 'index']);
-			Route::post('/departments', [DepartmentController::class, 'store']);
-			Route::get('/departments/{department}', [DepartmentController::class, 'show']);
-			Route::put('/departments/{department}', [DepartmentController::class, 'update']);
-			Route::delete('/departments/{department}', [DepartmentController::class, 'destroy']);
-			
-			// Roles
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Roles and Users Manage
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:users.manage,roles.manage')->group(function () {
 			Route::get('/roles', [RoleController::class, 'index']);
-			Route::post('/roles', [RoleController::class, 'store']);
 			Route::get('/roles/{role}', [RoleController::class, 'show']);
+			
+			Route::get('/permissions', [PermissionController::class, 'index']);
+			Route::get('/permissions/{permission}', [PermissionController::class, 'show']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Permission Manage
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:roles.manage')->group(function () {
+			Route::post('/roles', [RoleController::class, 'store']);
 			Route::put('/roles/{role}', [RoleController::class, 'update']);
 			Route::delete('/roles/{role}', [RoleController::class, 'destroy']);
 			
-			// Budget Allocations
-			Route::get('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'index']);
-			Route::post('/projects/{project}/budget-allocations', [ProjectBudgetAllocationController::class, 'store']);
-			Route::get('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'show']);
-			Route::put('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'update']);
-			Route::delete('/projects/{project}/budget-allocations/{alloc}', [ProjectBudgetAllocationController::class, 'destroy']);
+			Route::put('/roles/{role}/permissions', [RoleController::class, 'syncPermissions']);
 			
-			//Budget Lines
-			Route::post('/projects/{project}/budget-lines', [ProjectBudgetLineController::class, 'store']);
-			Route::put('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'update']);
-			Route::delete('/projects/{project}/budget-lines/{line}', [ProjectBudgetLineController::class, 'destroy']);
-			
-			// Status / lookup maintenance
-			Route::apiResource('project-statuses', ProjectStatusController::class)->parameters(['project-statuses' => 'status'])->except(['create','edit']);
-			Route::apiResource('task-statuses', TaskStatusController::class)->parameters(['task-statuses' => 'status'])->except(['create','edit']);
-			Route::apiResource('risk-statuses', RiskIssueStatusController::class)->parameters(['risk-statuses' => 'status'])->except(['create','edit']);
-			Route::apiResource('severities', SeverityController::class)->parameters(['severities' => 'severity'])->except(['create','edit']);
-			Route::apiResource('priorities', PriorityController::class)->except(['create','edit']);
-			Route::apiResource('external-sources', ExternalSourceController::class)->parameters(['external-sources' => 'source'])->except(['create','edit']);
-			Route::apiResource('risk-issue-types', RiskIssueTypeController::class)->parameters(['risk-issue-types' => 'type'])->except(['create','edit']);
-			Route::apiResource('project-categories', ProjectCategoryController::class)->except(['create','edit']);
-			
-			//Test Import Route
-			Route::post('/integrations/eptw/import-test',[EptwImportController::class, 'store']);
+			Route::post('/permissions', [PermissionController::class, 'store']);
+			Route::put('/permissions/{permission}', [PermissionController::class, 'update']);
+			Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy']);
 		});
 		
-		Route::middleware('role:PMO,PM,ADMIN')->group(function () {
-			Route::post('/projects/{project}/permit-links',[ProjectPermitLinkController::class, 'store']);
-			Route::delete('/projects/{project}/permit-links/{link}',[ProjectPermitLinkController::class, 'destroy']);
+		/*
+			|--------------------------------------------------------------------------
+			| Roles Manage
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:roles.manage')->group(function () {
+			Route::apiResource('roles', RoleController::class)->except(['create', 'edit']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Master Data Manage
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:masterdata.manage')->group(function () {
+			Route::apiResource('departments', DepartmentController::class)->except(['create', 'edit']);
+			
+			Route::apiResource('project-statuses', ProjectStatusController::class)->parameters(['project-statuses' => 'status'])
+			->except(['create', 'edit']);
+			
+			Route::apiResource('task-statuses', TaskStatusController::class)->parameters(['task-statuses' => 'status'])
+			->except(['create', 'edit']);
+			
+			Route::apiResource('risk-statuses', RiskIssueStatusController::class)->parameters(['risk-statuses' => 'status'])
+			->except(['create', 'edit']);
+			
+			Route::apiResource('severities', SeverityController::class)->parameters(['severities' => 'severity'])
+			->except(['create', 'edit']);
+			
+			Route::apiResource('priorities', PriorityController::class)->except(['create', 'edit']);
+			
+			Route::apiResource('external-sources', ExternalSourceController::class)->parameters(['external-sources' => 'source'])
+			->except(['create', 'edit']);
+			
+			Route::apiResource('risk-issue-types', RiskIssueTypeController::class)->parameters(['risk-issue-types' => 'type'])
+			->except(['create', 'edit']);
+			
+			Route::apiResource('project-categories', ProjectCategoryController::class)->except(['create', 'edit']);
 		});
 	});

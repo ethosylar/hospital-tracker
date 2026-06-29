@@ -18,13 +18,17 @@
             'code' => $this->department->code,
             'name' => $this->department->name,
 			]),
-			'roles' => $this->whenLoaded('roles', fn () =>
-            $this->roles->map(fn($r) => [
-			'id' => $r->id,
-			'code' => $r->code,
-			'name' => $r->name,
-            ])
+			'roles' => RoleResource::collection(
+			$this->whenLoaded('roles')
 			),
+			'permissions' => $this->whenLoaded('roles', function () {
+				return $this->roles
+				->flatMap(fn ($role) => $role->permissions ?? collect())
+				->where('is_active', true)
+				->pluck('code')
+				->unique()
+				->values();
+			}),
             'created_at' => optional($this->created_at)?->toISOString(),
             'updated_at' => optional($this->updated_at)?->toISOString(),
 			];

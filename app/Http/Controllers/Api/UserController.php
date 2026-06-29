@@ -22,7 +22,18 @@
 			$q = User::query()
             ->select(['id','name','username','email','department_id','created_at','updated_at'])
             ->with([
-			'roles:id,code,name',
+			'roles' => function ($q) {
+				$q->select('lt_roles.id', 'lt_roles.code', 'lt_roles.name');
+			},
+			'roles.permissions' => function ($q) {
+				$q->select(
+				'lt_permissions.id',
+				'lt_permissions.code',
+				'lt_permissions.name',
+				'lt_permissions.module',
+				'lt_permissions.is_active'
+				)->where('lt_permissions.is_active', true);
+			},
 			'department:id,code,name',
 			]); // eager-load roles
 			
@@ -43,7 +54,18 @@
 			$u = User::query()
             ->select(['id','name','username','email','department_id','created_at','updated_at'])
             ->with([
-			'roles:id,code,name',
+			'roles' => function ($q) {
+				$q->select('lt_roles.id', 'lt_roles.code', 'lt_roles.name');
+			},
+			'roles.permissions' => function ($q) {
+				$q->select(
+				'lt_permissions.id',
+				'lt_permissions.code',
+				'lt_permissions.name',
+				'lt_permissions.module',
+				'lt_permissions.is_active'
+				)->where('lt_permissions.is_active', true);
+			},
 			'department:id,code,name',
 			])
             ->find($user);

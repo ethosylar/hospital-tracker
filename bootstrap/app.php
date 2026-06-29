@@ -14,6 +14,7 @@
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
 		'role' => \App\Http\Middleware\RequireRole::class,
+		'permission' => \App\Http\Middleware\PermissionMiddleware::class,
 		]);
 	})
     ->withExceptions(function (Exceptions $exceptions): void {
