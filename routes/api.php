@@ -28,7 +28,9 @@
 		ExternalPermitController,
 		ProjectPermitLinkController,
 		EptwImportController,
-		IntegrationSyncRunController
+		IntegrationSyncRunController,
+		PermissionController
+		
 	};
 	
 	use App\Http\Controllers\AuthController;
@@ -274,15 +276,6 @@
 		
 		/*
 			|--------------------------------------------------------------------------
-			| Roles Manage
-			|--------------------------------------------------------------------------
-		*/
-		Route::middleware('permission:roles.manage')->group(function () {
-			Route::apiResource('roles', RoleController::class)->except(['create', 'edit']);
-		});
-		
-		/*
-			|--------------------------------------------------------------------------
 			| Master Data Manage
 			|--------------------------------------------------------------------------
 		*/
@@ -310,5 +303,14 @@
 			->except(['create', 'edit']);
 			
 			Route::apiResource('project-categories', ProjectCategoryController::class)->except(['create', 'edit']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| User & Roles Manage
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:users.manage,roles.manage')->group(function () {
+			Route::get('/lookups/user-management', [LookupController::class, 'userManagement']);
 		});
 	});

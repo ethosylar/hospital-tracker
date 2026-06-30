@@ -187,6 +187,5 @@
 		// Permission Based Role Access (lt_role_permissions, lt_permissions)
 		// ============================================================		
 		public const UNAUTHENTICATED = 'UNAUTHENTICATED';
-		public const FORBIDDEN = 'FORBIDDEN';
 		
 	}
