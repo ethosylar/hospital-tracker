@@ -42,6 +42,7 @@
 			
             'name' => ['sometimes', 'string', 'max:100'],
             'is_active' => ['sometimes', 'boolean'],
+			'is_system_role' => ['sometimes', 'boolean'],
 			
             'permission_ids' => ['sometimes', 'array'],
 			

@@ -14,6 +14,7 @@
             'code' => $this->code,
             'name' => $this->name,
             'is_active' => (bool)$this->is_active,
+			'is_system_role' => (bool) $this->is_system_role,
 			'permissions' => PermissionResource::collection($this->whenLoaded('permissions')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

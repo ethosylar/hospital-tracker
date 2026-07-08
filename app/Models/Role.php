@@ -9,13 +9,13 @@
 	{
 		protected $table = 'lt_roles';
 		
-		protected $fillable = ['code', 'name', 'is_active'];
+		protected $fillable = ['code', 'name', 'is_active', 'is_system_role',];
 		
 		protected $casts = [
         'is_active' => 'boolean',
+		'is_system_role' => 'boolean',
 		];
 		
-		// If you have pivot table dt_user_roles
 		public function users()
 		{
 			return $this->belongsToMany(User::class, 'dt_user_roles', 'role_id', 'user_id')->withTimestamps();

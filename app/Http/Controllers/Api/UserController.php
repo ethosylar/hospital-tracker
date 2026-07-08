@@ -112,6 +112,9 @@
             ]
 			);
 			
+			$created->refresh();
+			$this->loadUserForResponse($created);
+			
 			return (new UserResource($created))->response()->setStatusCode(201);
 		}
 		
@@ -156,7 +159,10 @@
 				);
 			}
 			
-			return response()->json(['ok' => true]);
+			$u->refresh();
+			$this->loadUserForResponse($u);
+			
+			return new UserResource($u);
 		}
 		
 		public function destroy($user)
@@ -219,10 +225,37 @@
             ]
 			);
 			
-			return response()->json([
-            'ok' => true,
-            'added_role_ids' => array_values($sync['attached'] ?? []),
-            'removed_role_ids' => array_values($sync['detached'] ?? []),
+			$u->refresh();
+			$this->loadUserForResponse($u);
+			
+			return new UserResource($u);
+		}
+		
+		private function loadUserForResponse(User $user): User
+		{
+			return $user->load([
+			'department:id,code,name',
+			
+			'roles' => function ($q) {
+				$q->select(
+                'lt_roles.id',
+                'lt_roles.code',
+                'lt_roles.name',
+                'lt_roles.is_active',
+                'lt_roles.is_system_role'
+				);
+			},
+			
+			'roles.permissions' => function ($q) {
+				$q->select(
+                'lt_permissions.id',
+                'lt_permissions.code',
+                'lt_permissions.name',
+                'lt_permissions.module',
+                'lt_permissions.is_active'
+				)
+				->where('lt_permissions.is_active', true);
+			},
 			]);
 		}
 	}

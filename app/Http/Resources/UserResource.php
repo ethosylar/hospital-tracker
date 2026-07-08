@@ -23,7 +23,9 @@
 			),
 			'permissions' => $this->whenLoaded('roles', function () {
 				return $this->roles
-				->flatMap(fn ($role) => $role->permissions ?? collect())
+				->flatMap(function ($role) {
+					return $role->relationLoaded('permissions') ? $role->permissions : collect();
+				})
 				->where('is_active', true)
 				->pluck('code')
 				->unique()

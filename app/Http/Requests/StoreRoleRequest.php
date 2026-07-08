@@ -32,6 +32,7 @@
             'code' => ['required','string','max:50','unique:lt_roles,code'],
             'name' => ['required','string','max:150'],
             'is_active' => ['nullable','boolean'],
+			'is_system_role' => ['nullable', 'boolean'],
 			'permission_ids' => ['nullable', 'array'],
 			
             'permission_ids.*' => [

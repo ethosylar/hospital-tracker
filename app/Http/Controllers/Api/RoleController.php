@@ -11,6 +11,7 @@
 	use App\Models\Role;
 	use Illuminate\Http\Request;
 	use Illuminate\Support\Facades\DB;
+	use Illuminate\Validation\ValidationException;
 	
 	class RoleController extends Controller
 	{
@@ -22,6 +23,7 @@
 			'code',
 			'name',
 			'is_active',
+			'is_system_role',
 			'created_at',
 			'updated_at',
             ]);
@@ -95,6 +97,9 @@
                 'is_active' => array_key_exists('is_active', $data)
 				? (bool) $data['is_active']
 				: true,
+				'is_system_role' => array_key_exists('is_system_role', $data)
+				? (bool) $data['is_system_role']
+				: false,
 				]);
 				
 				if (is_array($permissionIds)) {
@@ -111,6 +116,7 @@
 				'code' => $role->code,
 				'name' => $role->name,
 				'is_active' => (int) $role->is_active,
+				'is_system_role' => (int) $role->is_system_role,
 				'permission_ids' => is_array($permissionIds)
 				? array_values($permissionIds)
 				: [],
@@ -141,6 +147,12 @@
 			if (array_key_exists('is_active', $data)) {
 				$data['is_active'] = (bool) $data['is_active'];
 			}
+			
+			if (array_key_exists('is_system_role', $data)) {
+				$data['is_system_role'] = (bool) $data['is_system_role'];
+			}
+			
+			$this->assertProtectedRoleCanBeUpdated($role, $data);
 			
 			$oldRole = $role->getOriginal();
 			$oldPermissionIds = $role->permissions()
@@ -227,6 +239,8 @@
 		
 		public function destroy(Request $request, Role $role)
 		{
+			$this->assertRoleCanBeDeleted($role);
+			
 			$inUse = DB::table('dt_user_roles')
             ->where('role_id', $role->id)
             ->exists();
@@ -369,4 +383,58 @@
 			
 			return $permissionIds;
 		}
-	}	
+		
+		private function isProtectedRole(Role $role): bool
+		{
+			return $role->code === 'ADMIN' || (bool) $role->is_system_role;
+		}
+		
+		private function assertProtectedRoleCanBeUpdated(Role $role, array $data): void
+		{
+			if (!$this->isProtectedRole($role)) {
+				return;
+			}
+			
+			$messages = [];
+			
+			if (array_key_exists('code', $data) && $data['code'] !== $role->code) {
+				$messages[] = 'This protected role code cannot be changed.';
+			}
+			
+			if (array_key_exists('name', $data) && $data['name'] !== $role->name) {
+				$messages[] = 'This protected role name cannot be changed.';
+			}
+			
+			if (array_key_exists('is_active', $data) && (bool) $data['is_active'] === false) {
+				$messages[] = 'This protected role cannot be deactivated.';
+			}
+			
+			/*
+				* Once a role is protected, do not allow frontend to unprotect it.
+			*/
+			if (array_key_exists('is_system_role', $data) && (bool) $data['is_system_role'] === false) {
+				$messages[] = 'This protected role cannot be unprotected.';
+			}
+			
+			if (!empty($messages)) {
+				throw ValidationException::withMessages([
+				'role' => $messages,
+				]);
+			}
+		}
+		
+		private function assertRoleCanBeDeleted(Role $role): void
+		{
+			if (!$this->isProtectedRole($role)) {
+				return;
+			}
+			
+			throw ValidationException::withMessages([
+			'role' => [
+            'This protected role cannot be deleted.',
+			],
+			]);
+		}
+		
+		
+	}				

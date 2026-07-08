@@ -101,7 +101,17 @@
 			
 			if ($permission->code === 'system.all' && array_key_exists('code', $data) && $data['code'] !== 'system.all') {
 				throw ValidationException::withMessages([
-                'code' => ['The system.all permission code cannot be changed.'],
+				'code' => ['The system.all permission code cannot be changed.'],
+				]);
+			}
+			
+			if (
+			$permission->code === 'system.all'
+			&& array_key_exists('is_active', $data)
+			&& (bool) $data['is_active'] === false
+			) {
+				throw ValidationException::withMessages([
+				'is_active' => ['The system.all permission cannot be deactivated.'],
 				]);
 			}
 			
@@ -217,4 +227,4 @@
             'mode' => 'HARD',
 			]);
 		}
-	}	
+	}		
