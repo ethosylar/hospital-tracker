@@ -46,6 +46,7 @@
 			'FULL',
 			'INCREMENTAL',
 			'MANUAL',
+			'SINGLE',
 			]),
             ],
 			

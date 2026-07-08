@@ -1,8 +1,10 @@
 <?php
-
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
-
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+	
+	use Illuminate\Support\Facades\Schedule;
+	
+	Schedule::command('eptw:sync --mode=INCREMENTAL')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping();
+	
+	Schedule::command('eptw:sync --mode=FULL')
+    ->dailyAt('02:00')->withoutOverlapping();

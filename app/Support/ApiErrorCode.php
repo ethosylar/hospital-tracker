@@ -182,6 +182,9 @@
 		public const EPTW_PERMIT_LINKED_TO_ANOTHER_PROJECT ='EPTW_PERMIT_LINKED_TO_ANOTHER_PROJECT';
 		public const EPTW_TASK_PROJECT_MISMATCH ='EPTW_TASK_PROJECT_MISMATCH';
 		public const EPTW_PERMIT_SOURCE_DELETED ='EPTW_PERMIT_SOURCE_DELETED';
+		public const EPTW_SYNC_FAILED = 'EPTW_SYNC_FAILED';
+		public const EPTW_API_REQUEST_FAILED = 'EPTW_API_REQUEST_FAILED';
+		public const EPTW_SYNC_ALREADY_RUNNING = 'EPTW_SYNC_ALREADY_RUNNING';
 		
 		// ============================================================
 		// Permission Based Role Access (lt_role_permissions, lt_permissions)

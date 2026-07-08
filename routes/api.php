@@ -29,7 +29,8 @@
 		ProjectPermitLinkController,
 		EptwImportController,
 		IntegrationSyncRunController,
-		PermissionController
+		PermissionController,
+		EptwSyncController
 		
 	};
 	
@@ -47,6 +48,16 @@
 	Route::middleware('auth:sanctum')->group(function () {
 		Route::post('/logout', [AuthController::class, 'logout']);
 		Route::get('/me', [AuthController::class, 'me']);
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Sync ePTW
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:permits.sync')->group(function () {
+			Route::post('/integrations/eptw/sync', [EptwSyncController::class, 'sync']);
+			Route::post('/integrations/eptw/sync-one', [EptwSyncController::class, 'syncOne']);
+		});
 		
 		/*
 			|--------------------------------------------------------------------------
@@ -199,7 +210,7 @@
 		
 		/*
 			|--------------------------------------------------------------------------
-			| Permit Sync
+			| Test Permit Sync
 			|--------------------------------------------------------------------------
 		*/
 		Route::middleware('permission:permits.sync')->group(function () {
