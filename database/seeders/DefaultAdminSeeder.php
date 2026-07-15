@@ -17,8 +17,9 @@
 			DB::table('users')->updateOrInsert(
 			['email' => 'admin@hospital.local'],
 			[
+			'username' => 'admin',
 			'name' => 'System Admin',
-			'password' => Hash::make('Admin@123'),
+			'password' => Hash::make('Admin@1234'),
 			'updated_at' => now(),
 			'created_at' => now(),
 			]
