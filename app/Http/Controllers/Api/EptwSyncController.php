@@ -21,7 +21,7 @@
 			$data = $request->validated();
 			
 			$mode = $data['mode'];
-			$runAsync = $request->boolean('run_async', true);
+			$runAsync = $request->boolean('run_async', false);
 			
 			try {
 				if ($runAsync) {
@@ -107,4 +107,4 @@
 				);
 			}
 		}
-	}	
+	}
