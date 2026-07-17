@@ -101,56 +101,63 @@
 			
             'remark' => $this->value($record, ['remark']),
 			
-            'work_start_date' => $this->value($record, [
-			'work_start_date',
-			'durationFrom',
-            ]),
+            'work_start_date' => $this->cleanDate(
+			$record['work_start_date']
+			?? $record['durationFrom']
+			?? null
+			),
 			
-            'work_end_date' => $this->value($record, [
-			'work_end_date',
-			'durationTo',
-            ]),
+			'work_end_date' => $this->cleanDate(
+			$record['work_end_date']
+			?? $record['durationTo']
+			?? null
+			),
 			
-            'work_start_time' => $this->normalizeTime(
-			$this->value($record, [
-			'work_start_time',
-			'timeFrom',
-			])
-            ),
+			'work_start_time' => $this->cleanTime(
+			$record['work_start_time']
+			?? $record['timeFrom']
+			?? null
+			),
 			
-            'work_end_time' => $this->normalizeTime(
-			$this->value($record, [
-			'work_end_time',
-			'timeTo',
-			])
-            ),
+			'work_end_time' => $this->cleanTime(
+			$record['work_end_time']
+			?? $record['timeTo']
+			?? null
+			),
 			
-            'brief_date' => $this->value($record, [
-			'brief_date',
-			'briefDate',
-            ]),
+			'brief_date' => $this->cleanDate(
+			$record['brief_date']
+			?? $record['briefDate']
+			?? $record['BriefDate']
+			?? null
+			),
 			
-            'brief_time' => $this->normalizeTime(
-			$this->value($record, [
-			'brief_time',
-			'briefTime',
-			])
-            ),
+			'brief_time' => $this->cleanTime(
+			$record['brief_time']
+			?? $record['briefTime']
+			?? $record['BriefTime']
+			?? null,
+			true
+			),
 			
             'brief_conducted_by' => $this->value($record, [
 			'brief_conducted_by',
 			'briefConducted',
             ]),
 			
-            'source_created_at' => $this->value($record, [
-			'source_created_at',
-			'date',
-            ]),
+            'source_created_at' => $this->cleanDateTime(
+			$record['source_created_at']
+			?? $record['created_at']
+			?? $record['date']
+			?? null
+			),
 			
-            'source_updated_at' => $this->value($record, [
-			'source_updated_at',
-			'updated_at',
-            ]),
+			'source_updated_at' => $this->cleanDateTime(
+			$record['source_updated_at']
+			?? $record['updated_at']
+			?? $record['date']
+			?? null
+			),
 			
             'source_url' => $sourceUrl,
 			
@@ -196,4 +203,75 @@
 			
 			return $time;
 		}
-	}	
+		
+		private function cleanDate(mixed $value): ?string
+		{
+			if ($value === null) {
+				return null;
+			}
+			
+			$value = trim((string) $value);
+			
+			if (
+			$value === '' ||
+			$value === '0000-00-00' ||
+			$value === '0000/00/00'
+			) {
+				return null;
+			}
+			
+			try {
+				return \Carbon\Carbon::parse($value)->format('Y-m-d');
+				} catch (\Throwable) {
+				return null;
+			}
+		}
+		
+		private function cleanTime(mixed $value, bool $zeroAsNull = false): ?string
+		{
+			if ($value === null) {
+				return null;
+			}
+			
+			$value = trim((string) $value);
+			
+			if ($value === '') {
+				return null;
+			}
+			
+			if ($zeroAsNull && in_array($value, ['00:00', '00:00:00'], true)) {
+				return null;
+			}
+			
+			try {
+				return \Carbon\Carbon::parse($value)->format('H:i:s');
+				} catch (\Throwable) {
+				return null;
+			}
+		}
+		
+		private function cleanDateTime(mixed $value): ?string
+		{
+			if ($value === null) {
+				return null;
+			}
+			
+			$value = trim((string) $value);
+			
+			if (
+			$value === '' ||
+			$value === '0000-00-00' ||
+			$value === '0000-00-00 00:00:00' ||
+			$value === '0000/00/00' ||
+			$value === '0000/00/00 00:00:00'
+			) {
+				return null;
+			}
+			
+			try {
+				return \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s');
+				} catch (\Throwable) {
+				return null;
+			}
+		}
+	}				
