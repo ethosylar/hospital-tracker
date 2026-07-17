@@ -56,6 +56,7 @@
 				return ApiResponse::error(
                 ApiErrorCode::EPTW_SYNC_FAILED,
                 'Failed to start ePTW synchronization.',
+                $this->errorDetails($e),
                 500
 				);
 			}
@@ -103,8 +104,21 @@
 				return ApiResponse::error(
                 ApiErrorCode::EPTW_SYNC_FAILED,
                 'Failed to fetch ePTW permit.',
+                $this->errorDetails($e),
                 500
 				);
 			}
 		}
-	}
+		
+		private function errorDetails(Throwable $e): array
+		{
+			if (!config('app.debug')) {
+				return [];
+			}
+			
+			return [
+            'exception' => $e->getMessage(),
+            'exception_class' => get_class($e),
+			];
+		}
+	}	
