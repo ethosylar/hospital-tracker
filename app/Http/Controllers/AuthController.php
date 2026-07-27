@@ -3,6 +3,7 @@
 	namespace App\Http\Controllers;
 	
 	use App\Models\User;
+	use App\Support\Audit;
 	use Illuminate\Http\Request;
 	use Illuminate\Support\Facades\Hash;
 	use Illuminate\Validation\ValidationException;
@@ -34,6 +35,18 @@
 			
 			$token = $user->createToken('angular')->plainTextToken;
 			
+			Audit::log(
+			(int) $user->id,
+			'AUTH',
+			(int) $user->id,
+			'LOGIN',
+			[
+			'login' => $login,
+			'ip' => $request->ip(),
+			'user_agent' => $request->userAgent(),
+			]
+			);
+			
 			return response()->json([
             'token' => $token,
             ...$this->authPayload($user),
@@ -49,10 +62,28 @@
 		
 		public function logout(Request $request)
 		{
-			$request->user()->currentAccessToken()?->delete();
+			$user = $request->user();
+			$token = $user?->currentAccessToken();
+			
+			if ($user) {
+				Audit::log(
+				(int) $user->id,
+				'AUTH',
+				(int) $user->id,
+				'LOGOUT',
+				[
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'token_id' => $token?->id,
+                'token_name' => $token?->name,
+				]
+				);
+			}
+			
+			$token?->delete();
 			
 			return response()->json([
-            'ok' => true,
+			'ok' => true,
 			]);
 		}
 		
@@ -107,4 +138,4 @@
             'permissions' => $permissions,
 			];
 		}
-	}	
+	}			
