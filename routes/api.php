@@ -189,6 +189,30 @@
 		
 		/*
 			|--------------------------------------------------------------------------
+			| External Risk Issues
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:risks.read')->group(function () {
+			Route::get('/external-risk-issues', [ExternalRiskIssueController::class, 'index']);
+			Route::get('/external-risk-issues/{issue}', [ExternalRiskIssueController::class, 'show']);
+			
+			Route::get('/projects/{project}/external-risk-issues', [ExternalRiskIssueController::class, 'projectIndex']);
+			Route::get('/tasks/{task}/external-risk-issues', [ExternalRiskIssueController::class, 'taskIndex']);
+			Route::get('/projects/{project}/milestones/{milestone}/external-risk-issues', [ExternalRiskIssueController::class, 'milestoneIndex']);
+			Route::get('/external-permits/{permit}/risk-issues', [ExternalRiskIssueController::class, 'permitIndex']);
+		});
+		
+		Route::middleware('permission:risks.write')->group(function () {
+			Route::post('/external-risk-issues', [ExternalRiskIssueController::class, 'store']);
+			Route::put('/external-risk-issues/{issue}', [ExternalRiskIssueController::class, 'update']);
+			Route::delete('/external-risk-issues/{issue}', [ExternalRiskIssueController::class, 'destroy']);
+			
+			Route::post('/external-risk-issues/{issue}/links', [ExternalRiskIssueController::class, 'link']);
+			Route::delete('/external-risk-issues/{issue}/links/{link}', [ExternalRiskIssueController::class, 'unlink']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
 			| ePTW Routing
 			|--------------------------------------------------------------------------
 		*/

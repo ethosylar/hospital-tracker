@@ -33,4 +33,9 @@
 		{
 			return $this->hasMany(\App\Models\ProjectBudgetAllocation::class, 'milestone_id');
 		}
+		
+		public function externalRiskIssueLinks()
+		{
+			return $this->hasMany(\App\Models\ExternalRiskIssueLink::class, 'milestone_id');
+		}
 	}

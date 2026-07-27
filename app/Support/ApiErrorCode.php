@@ -110,14 +110,17 @@
 		public const EXTERNAL_SOURCE_DELETE_FAILED = 'EXTERNAL_SOURCE_DELETE_FAILED';
 		
 		// ============================================================
-		// External Risk Issue (dt_external_risk_issues)
+		// External Risk Issue (dt_external_risk_issues, dt_external_risk_issue_links)
 		// ============================================================
 		public const EXTERNAL_RISK_ISSUE_CREATE_FAILED = 'EXTERNAL_RISK_ISSUE_CREATE_FAILED';
 		public const EXTERNAL_RISK_ISSUE_UPDATE_FAILED = 'EXTERNAL_RISK_ISSUE_UPDATE_FAILED';
 		public const EXTERNAL_RISK_ISSUE_DELETE_FAILED = 'EXTERNAL_RISK_ISSUE_DELETE_FAILED';
-		
 		public const EXTERNAL_RISK_ISSUE_DUPLICATE_EXTERNAL_ID = 'EXTERNAL_RISK_ISSUE_DUPLICATE_EXTERNAL_ID';
 		public const EXTERNAL_RISK_ISSUE_INVALID_RAW_PAYLOAD   = 'EXTERNAL_RISK_ISSUE_INVALID_RAW_PAYLOAD';
+		public const EXTERNAL_RISK_ISSUE_DUPLICATE_LINK = 'EXTERNAL_RISK_ISSUE_DUPLICATE_LINK';
+		public const EXTERNAL_RISK_ISSUE_LINK_FAILED = 'EXTERNAL_RISK_ISSUE_LINK_FAILED';
+		public const EXTERNAL_RISK_ISSUE_UNLINK_FAILED = 'EXTERNAL_RISK_ISSUE_UNLINK_FAILED';
+		public const EXTERNAL_RISK_ISSUE_LINK_NOT_FOUND = 'EXTERNAL_RISK_ISSUE_LINK_NOT_FOUND';
 		
 		// ============================================================
 		// Dashboard (optional; only if you start wrapping overview() with try/catch)
@@ -190,5 +193,6 @@
 		// Permission Based Role Access (lt_role_permissions, lt_permissions)
 		// ============================================================		
 		public const UNAUTHENTICATED = 'UNAUTHENTICATED';
+		
 		
 	}
