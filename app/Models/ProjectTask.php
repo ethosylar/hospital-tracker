@@ -119,4 +119,9 @@
 			])
 			->withTimestamps();
 		}
+		
+		public function externalRiskIssueLinks()
+		{
+			return $this->hasMany(\App\Models\ExternalRiskIssueLink::class, 'task_id');
+		}
 	}

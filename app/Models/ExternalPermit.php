@@ -125,4 +125,9 @@
             ])
             ->withTimestamps();
 		}
-	}	
+		
+		public function externalRiskIssueLinks()
+		{
+			return $this->hasMany(\App\Models\ExternalRiskIssueLink::class, 'permit_id');
+		}
+	}		
