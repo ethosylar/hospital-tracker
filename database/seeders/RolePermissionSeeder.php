@@ -30,6 +30,15 @@
 			'risks.write',
 			'permits.read',
 			'permits.link',
+			'agreements.read',
+			'agreements.write',
+			'agreements.delete',
+			'agreements.approve',
+			'agreements.renew',
+			'agreements.terminate',
+			'agreements.archive',
+			'agreements.files.read',
+			'agreements.files.write',
             ],
 			
             'PM' => [
@@ -46,6 +55,10 @@
 			'risks.write',
 			'permits.read',
 			'permits.link',
+			'agreements.read',
+			'agreements.write',
+			'agreements.files.read',
+			'agreements.files.write',
             ],
 			
             'AUDITOR' => [
@@ -56,6 +69,8 @@
 			'risks.read',
 			'permits.read',
 			'audit.view',
+			'agreements.read',
+			'agreements.files.read',
             ],
 			
             'STAFF' => [
@@ -65,6 +80,8 @@
 			'budget.read',
 			'risks.read',
 			'permits.read',
+			'agreements.read',
+			'agreements.files.read',
             ],
 			];
 			
@@ -83,4 +100,4 @@
 				$role->permissions()->sync($permissionIds);
 			}
 		}
-	}	
+	}		

@@ -195,4 +195,11 @@
 		public const UNAUTHENTICATED = 'UNAUTHENTICATED';
 		
 		
+		// ============================================================
+		// Agreement Status (st_agreement_statuses)
+		// ============================================================
+		public const AGREEMENT_STATUS_CREATE_FAILED = 'AGREEMENT_STATUS_CREATE_FAILED';
+		public const AGREEMENT_STATUS_UPDATE_FAILED = 'AGREEMENT_STATUS_UPDATE_FAILED';
+		public const AGREEMENT_STATUS_DELETE_FAILED = 'AGREEMENT_STATUS_DELETE_FAILED';
+		public const AGREEMENT_STATUS_PROTECTED = 'AGREEMENT_STATUS_PROTECTED';
 	}

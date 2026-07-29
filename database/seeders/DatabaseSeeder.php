@@ -20,6 +20,9 @@
 			$this->call([
 			LookupStatusSeeder::class,
 			DefaultAdminSeeder::class,
+			AgreementStatusSeeder::class,
+			RolePermissionSeeder::class,
+			PermissionSeeder::class,
 			]);
 		}
 	}

@@ -30,7 +30,8 @@
 		EptwImportController,
 		IntegrationSyncRunController,
 		PermissionController,
-		EptwSyncController
+		EptwSyncController,
+		AgreementStatusController
 		
 	};
 	
@@ -354,5 +355,21 @@
 		*/
 		Route::middleware('permission:users.manage,roles.manage')->group(function () {
 			Route::get('/lookups/user-management', [LookupController::class, 'userManagement']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Manage
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:agreements.read,agreements.write,agreements.status.manage')->group(function () {
+			Route::get('/agreement-statuses', [AgreementStatusController::class, 'index']);
+			Route::get('/agreement-statuses/{status}', [AgreementStatusController::class, 'show']);
+		});
+		
+		Route::middleware('permission:agreements.status.manage')->group(function () {
+			Route::post('/agreement-statuses', [AgreementStatusController::class, 'store']);
+			Route::put('/agreement-statuses/{status}', [AgreementStatusController::class, 'update']);
+			Route::delete('/agreement-statuses/{status}', [AgreementStatusController::class, 'destroy']);
 		});
 	});
