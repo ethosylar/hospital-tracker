@@ -195,4 +195,63 @@
 		public const UNAUTHENTICATED = 'UNAUTHENTICATED';
 		
 		
+		// ============================================================
+		// Agreement Status (st_agreement_statuses)
+		// ============================================================
+		public const AGREEMENT_STATUS_CREATE_FAILED = 'AGREEMENT_STATUS_CREATE_FAILED';
+		public const AGREEMENT_STATUS_UPDATE_FAILED = 'AGREEMENT_STATUS_UPDATE_FAILED';
+		public const AGREEMENT_STATUS_DELETE_FAILED = 'AGREEMENT_STATUS_DELETE_FAILED';
+		public const AGREEMENT_STATUS_PROTECTED = 'AGREEMENT_STATUS_PROTECTED';
+		
+		// ============================================================
+		// Agreement Category (lt_agreement_categories)
+		// ============================================================
+		public const AGREEMENT_CATEGORY_CREATE_FAILED = 'AGREEMENT_CATEGORY_CREATE_FAILED';
+		public const AGREEMENT_CATEGORY_UPDATE_FAILED = 'AGREEMENT_CATEGORY_UPDATE_FAILED';
+		public const AGREEMENT_CATEGORY_DELETE_FAILED = 'AGREEMENT_CATEGORY_DELETE_FAILED';
+		public const AGREEMENT_CATEGORY_PROTECTED = 'AGREEMENT_CATEGORY_PROTECTED';
+		public const AGREEMENT_CATEGORY_IN_USE = 'AGREEMENT_CATEGORY_IN_USE';
+		
+		// ============================================================
+		// Agreement Type (lt_agreement_types)
+		// ============================================================
+		public const AGREEMENT_TYPE_CREATE_FAILED = 'AGREEMENT_TYPE_CREATE_FAILED';
+		public const AGREEMENT_TYPE_UPDATE_FAILED = 'AGREEMENT_TYPE_UPDATE_FAILED';
+		public const AGREEMENT_TYPE_DELETE_FAILED = 'AGREEMENT_TYPE_DELETE_FAILED';
+		public const AGREEMENT_TYPE_PROTECTED = 'AGREEMENT_TYPE_PROTECTED';
+		
+		// ============================================================
+		// Agreement Counterparty (dt_counterparties)
+		// ============================================================
+		public const COUNTERPARTY_DUPLICATE = 'COUNTERPARTY_DUPLICATE';
+		public const COUNTERPARTY_CREATE_FAILED = 'COUNTERPARTY_CREATE_FAILED';
+		public const COUNTERPARTY_UPDATE_FAILED = 'COUNTERPARTY_UPDATE_FAILED';
+		public const COUNTERPARTY_DELETE_FAILED = 'COUNTERPARTY_DELETE_FAILED';
+		
+		// ============================================================
+		// Agreement (dt_counterparties)
+		// ============================================================
+		public const AGREEMENT_ACCESS_DENIED = 'AGREEMENT_ACCESS_DENIED';
+		public const AGREEMENT_CREATE_FAILED = 'AGREEMENT_CREATE_FAILED';
+		public const AGREEMENT_UPDATE_FAILED = 'AGREEMENT_UPDATE_FAILED';
+		public const AGREEMENT_NOT_EDITABLE = 'AGREEMENT_NOT_EDITABLE';
+		public const AGREEMENT_INVALID_TRANSITION = 'AGREEMENT_INVALID_TRANSITION';
+		public const AGREEMENT_INVALID_DATES = 'AGREEMENT_INVALID_DATES';
+		public const AGREEMENT_TYPE_CATEGORY_MISMATCH = 'AGREEMENT_TYPE_CATEGORY_MISMATCH';
+		public const AGREEMENT_REVIEW_FAILED = 'AGREEMENT_REVIEW_FAILED';
+		public const AGREEMENT_SUBMIT_FAILED = 'AGREEMENT_SUBMIT_FAILED';
+		public const AGREEMENT_APPROVE_FAILED = 'AGREEMENT_APPROVE_FAILED';
+		public const AGREEMENT_ACTIVATE_FAILED = 'AGREEMENT_ACTIVATE_FAILED';
+		public const AGREEMENT_AMEND_FAILED = 'AGREEMENT_AMEND_FAILED';
+		public const AGREEMENT_RENEW_FAILED = 'AGREEMENT_RENEW_FAILED';
+		public const AGREEMENT_TERMINATE_FAILED = 'AGREEMENT_TERMINATE_FAILED';
+		public const AGREEMENT_ARCHIVE_FAILED = 'AGREEMENT_ARCHIVE_FAILED';
+		public const AGREEMENT_CANCEL_FAILED = 'AGREEMENT_CANCEL_FAILED';
+		public const AGREEMENT_PROJECT_ALREADY_LINKED = 'AGREEMENT_PROJECT_ALREADY_LINKED';
+		public const AGREEMENT_PROJECT_LINK_NOT_FOUND = 'AGREEMENT_PROJECT_LINK_NOT_FOUND';
+		public const AGREEMENT_PROJECT_LINK_FAILED = 'AGREEMENT_PROJECT_LINK_FAILED';
+		public const AGREEMENT_PROJECT_UNLINK_FAILED = 'AGREEMENT_PROJECT_UNLINK_FAILED';
+		
+		
+		
 	}
