@@ -14,15 +14,17 @@
 			* Seed the application's database.
 		*/
 		public function run(): void
-		{
-			// User::factory(10)->create();
-			
+		{			
 			$this->call([
 			LookupStatusSeeder::class,
-			DefaultAdminSeeder::class,
-			AgreementStatusSeeder::class,
-			RolePermissionSeeder::class,
 			PermissionSeeder::class,
+			
+			AgreementRoleSeeder::class,
+			AgreementStatusSeeder::class,
+			AgreementCategorySeeder::class,
+			
+			RolePermissionSeeder::class,
+			DefaultAdminSeeder::class,
 			]);
 		}
 	}

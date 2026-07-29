@@ -30,15 +30,6 @@
 			'risks.write',
 			'permits.read',
 			'permits.link',
-			'agreements.read',
-			'agreements.write',
-			'agreements.delete',
-			'agreements.approve',
-			'agreements.renew',
-			'agreements.terminate',
-			'agreements.archive',
-			'agreements.files.read',
-			'agreements.files.write',
             ],
 			
             'PM' => [
@@ -55,10 +46,6 @@
 			'risks.write',
 			'permits.read',
 			'permits.link',
-			'agreements.read',
-			'agreements.write',
-			'agreements.files.read',
-			'agreements.files.write',
             ],
 			
             'AUDITOR' => [
@@ -69,8 +56,6 @@
 			'risks.read',
 			'permits.read',
 			'audit.view',
-			'agreements.read',
-			'agreements.files.read',
             ],
 			
             'STAFF' => [
@@ -80,8 +65,73 @@
 			'budget.read',
 			'risks.read',
 			'permits.read',
-			'agreements.read',
-			'agreements.files.read',
+            ],
+			
+            /*
+				* Agreement Owner:
+				* Maintains agreements assigned to the user.
+			*/
+            'AGREEMENT_OWNER' => [
+			'dashboard.view',
+			'projects.read',
+			
+			'agreements.view.own',
+			'agreements.create',
+			'agreements.edit',
+			'agreements.submit',
+			'agreements.projects.link',
+			'agreements.documents.upload',
+			'agreements.renew',
+            ],
+			
+            /*
+				* Department Reviewer:
+				* Reviews agreements belonging to the reviewer's department.
+			*/
+            'DEPARTMENT_REVIEWER' => [
+			'dashboard.view',
+			'projects.read',
+			
+			'agreements.view.department',
+			'agreements.edit',
+			'agreements.submit',
+			'agreements.documents.upload',
+            ],
+			
+            /*
+				* Agreement Administrator:
+				* Manages the Agreement module across all departments.
+			*/
+            'AGREEMENT_ADMIN' => [
+			'dashboard.view',
+			'projects.read',
+			
+			'agreements.view.all',
+			'agreements.create',
+			'agreements.edit',
+			'agreements.submit',
+			'agreements.approve',
+			'agreements.projects.link',
+			'agreements.documents.upload',
+			'agreements.renew',
+			'agreements.terminate',
+			'agreements.archive',
+			'agreements.categories.manage',
+			'agreements.types.manage',
+			'agreements.status.manage',
+			'agreements.audit.view',
+            ],
+			
+            /*
+				* Approver:
+				* Reviews and approves agreements for the approver's department.
+			*/
+            'APPROVER' => [
+			'dashboard.view',
+			
+			'agreements.view.department',
+			'agreements.approve',
+			'agreements.audit.view',
             ],
 			];
 			
@@ -100,4 +150,4 @@
 				$role->permissions()->sync($permissionIds);
 			}
 		}
-	}		
+	}			

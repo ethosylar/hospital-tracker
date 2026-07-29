@@ -202,4 +202,21 @@
 		public const AGREEMENT_STATUS_UPDATE_FAILED = 'AGREEMENT_STATUS_UPDATE_FAILED';
 		public const AGREEMENT_STATUS_DELETE_FAILED = 'AGREEMENT_STATUS_DELETE_FAILED';
 		public const AGREEMENT_STATUS_PROTECTED = 'AGREEMENT_STATUS_PROTECTED';
+		
+		// ============================================================
+		// Agreement Category (lt_agreement_categories)
+		// ============================================================
+		public const AGREEMENT_CATEGORY_CREATE_FAILED = 'AGREEMENT_CATEGORY_CREATE_FAILED';
+		public const AGREEMENT_CATEGORY_UPDATE_FAILED = 'AGREEMENT_CATEGORY_UPDATE_FAILED';
+		public const AGREEMENT_CATEGORY_DELETE_FAILED = 'AGREEMENT_CATEGORY_DELETE_FAILED';
+		public const AGREEMENT_CATEGORY_PROTECTED = 'AGREEMENT_CATEGORY_PROTECTED';
+		public const AGREEMENT_CATEGORY_IN_USE = 'AGREEMENT_CATEGORY_IN_USE';
+		
+		// ============================================================
+		// Agreement Type (lt_agreement_types)
+		// ============================================================
+		public const AGREEMENT_TYPE_CREATE_FAILED = 'AGREEMENT_TYPE_CREATE_FAILED';
+		public const AGREEMENT_TYPE_UPDATE_FAILED = 'AGREEMENT_TYPE_UPDATE_FAILED';
+		public const AGREEMENT_TYPE_DELETE_FAILED = 'AGREEMENT_TYPE_DELETE_FAILED';
+		public const AGREEMENT_TYPE_PROTECTED = 'AGREEMENT_TYPE_PROTECTED';
 	}

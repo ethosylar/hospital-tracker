@@ -31,7 +31,9 @@
 		IntegrationSyncRunController,
 		PermissionController,
 		EptwSyncController,
-		AgreementStatusController
+		AgreementStatusController,
+		AgreementTypeController,
+		AgreementCategoryController
 		
 	};
 	
@@ -358,18 +360,84 @@
 		});
 		
 		/*
-			|--------------------------------------------------------------------------
-			| Agreement Manage
-			|--------------------------------------------------------------------------
+		|--------------------------------------------------------------------------
+		| Agreement Category Read
+		|--------------------------------------------------------------------------
 		*/
-		Route::middleware('permission:agreements.read,agreements.write,agreements.status.manage')->group(function () {
-			Route::get('/agreement-statuses', [AgreementStatusController::class, 'index']);
-			Route::get('/agreement-statuses/{status}', [AgreementStatusController::class, 'show']);
+		Route::middleware(
+		'permission:agreements.view.own,agreements.view.department,agreements.view.all,agreements.categories.manage'
+		)->group(function () {
+			Route::get(
+			'/agreement-categories',
+			[AgreementCategoryController::class, 'index']
+			);
+			
+			Route::get(
+			'/agreement-categories/{category}',
+			[AgreementCategoryController::class, 'show']
+			);
 		});
 		
-		Route::middleware('permission:agreements.status.manage')->group(function () {
-			Route::post('/agreement-statuses', [AgreementStatusController::class, 'store']);
-			Route::put('/agreement-statuses/{status}', [AgreementStatusController::class, 'update']);
-			Route::delete('/agreement-statuses/{status}', [AgreementStatusController::class, 'destroy']);
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Category Management
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:agreements.categories.manage')->group(function () {
+			Route::post(
+			'/agreement-categories',
+			[AgreementCategoryController::class, 'store']
+			);
+			
+			Route::put(
+			'/agreement-categories/{category}',
+			[AgreementCategoryController::class, 'update']
+			);
+			
+			Route::delete(
+			'/agreement-categories/{category}',
+			[AgreementCategoryController::class, 'destroy']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Type Read
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware(
+		'permission:agreements.view.own,agreements.view.department,agreements.view.all,agreements.types.manage'
+		)->group(function () {
+			Route::get(
+			'/agreement-types',
+			[AgreementTypeController::class, 'index']
+			);
+			
+			Route::get(
+			'/agreement-types/{type}',
+			[AgreementTypeController::class, 'show']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Type Management
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:agreements.types.manage')->group(function () {
+			Route::post(
+			'/agreement-types',
+			[AgreementTypeController::class, 'store']
+			);
+			
+			Route::put(
+			'/agreement-types/{type}',
+			[AgreementTypeController::class, 'update']
+			);
+			
+			Route::delete(
+			'/agreement-types/{type}',
+			[AgreementTypeController::class, 'destroy']
+			);
 		});
 	});
