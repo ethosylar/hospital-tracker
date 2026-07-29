@@ -97,8 +97,8 @@
 			return $code;
 		}
 		
-		// public function agreements()
-		// {
-		//     return $this->hasMany(Agreement::class, 'counterparty_id');
-		// }
+		public function agreements()
+		{
+		    return $this->hasMany(Agreement::class, 'counterparty_id');
+		}
 	}	

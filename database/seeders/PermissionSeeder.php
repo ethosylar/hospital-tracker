@@ -65,6 +65,7 @@
             ['code' => 'agreements.audit.view', 'name' => 'View Agreement Audit Logs', 'module' => 'Agreements'],
 			
 			['code' => 'agreements.counterparties.manage','name' => 'Manage Agreement Counterparties','module' => 'Agreements',],
+			['code' => 'agreements.amend','name' => 'Amend Agreements','module' => 'Agreements',],
 			
 			];
 			

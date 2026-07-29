@@ -82,6 +82,7 @@
 			'agreements.projects.link',
 			'agreements.documents.upload',
 			'agreements.renew',
+			'agreements.amend',
 			
 			'agreements.counterparties.manage',
             ],
@@ -122,6 +123,7 @@
 			'agreements.types.manage',
 			'agreements.status.manage',
 			'agreements.audit.view',
+			'agreements.amend',
 			
 			'agreements.counterparties.manage',
             ],

@@ -34,7 +34,8 @@
 		AgreementStatusController,
 		AgreementTypeController,
 		AgreementCategoryController,
-		CounterpartyController
+		CounterpartyController,
+		AgreementController,
 		
 	};
 	
@@ -460,6 +461,115 @@
 			Route::post('/counterparties', [CounterpartyController::class, 'store']);
 			Route::put('/counterparties/{counterparty}', [CounterpartyController::class, 'update']);
 			Route::delete('/counterparties/{counterparty}', [CounterpartyController::class, 'destroy']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Read
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware(
+		'permission:agreements.view.own,agreements.view.department,agreements.view.all'
+		)->group(function () {
+			Route::get('/agreements', [AgreementController::class, 'index']);
+			Route::get('/agreements/{agreement}', [AgreementController::class, 'show']);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Create and Edit
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:agreements.create')->group(function () {
+			Route::post('/agreements', [AgreementController::class, 'store']);
+		});
+		
+		Route::middleware('permission:agreements.edit')->group(function () {
+			Route::put('/agreements/{agreement}', [AgreementController::class, 'update']);
+			
+			Route::post(
+			'/agreements/{agreement}/review',
+			[AgreementController::class, 'review']
+			);
+			
+			Route::post(
+			'/agreements/{agreement}/cancel',
+			[AgreementController::class, 'cancel']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Submission and Approval
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:agreements.submit')->group(function () {
+			Route::post(
+			'/agreements/{agreement}/submit',
+			[AgreementController::class, 'submit']
+			);
+		});
+		
+		Route::middleware('permission:agreements.approve')->group(function () {
+			Route::post(
+			'/agreements/{agreement}/approve',
+			[AgreementController::class, 'approve']
+			);
+			
+			Route::post(
+			'/agreements/{agreement}/activate',
+			[AgreementController::class, 'activate']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Amendment, Renewal, Termination, Archive
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:agreements.amend')->group(function () {
+			Route::post(
+			'/agreements/{agreement}/amend',
+			[AgreementController::class, 'amend']
+			);
+		});
+		
+		Route::middleware('permission:agreements.renew')->group(function () {
+			Route::post(
+			'/agreements/{agreement}/renew',
+			[AgreementController::class, 'renew']
+			);
+		});
+		
+		Route::middleware('permission:agreements.terminate')->group(function () {
+			Route::post(
+			'/agreements/{agreement}/terminate',
+			[AgreementController::class, 'terminate']
+			);
+		});
+		
+		Route::middleware('permission:agreements.archive')->group(function () {
+			Route::post(
+			'/agreements/{agreement}/archive',
+			[AgreementController::class, 'archive']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Project Links
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:agreements.projects.link')->group(function () {
+			Route::post(
+			'/agreements/{agreement}/project-links',
+			[AgreementController::class, 'linkProject']
+			);
+			
+			Route::delete(
+			'/agreements/{agreement}/project-links/{link}',
+			[AgreementController::class, 'unlinkProject']
+			);
 		});
 		
 		
