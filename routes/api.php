@@ -33,7 +33,8 @@
 		EptwSyncController,
 		AgreementStatusController,
 		AgreementTypeController,
-		AgreementCategoryController
+		AgreementCategoryController,
+		CounterpartyController
 		
 	};
 	
@@ -360,9 +361,9 @@
 		});
 		
 		/*
-		|--------------------------------------------------------------------------
-		| Agreement Category Read
-		|--------------------------------------------------------------------------
+			|--------------------------------------------------------------------------
+			| Agreement Category Read
+			|--------------------------------------------------------------------------
 		*/
 		Route::middleware(
 		'permission:agreements.view.own,agreements.view.department,agreements.view.all,agreements.categories.manage'
@@ -440,4 +441,26 @@
 			[AgreementTypeController::class, 'destroy']
 			);
 		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Counterparty Management
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware(
+		'permission:agreements.view.own,agreements.view.department,agreements.view.all,agreements.create,agreements.counterparties.manage'
+		)->group(function () {
+			Route::get('/counterparties', [CounterpartyController::class, 'index']);
+			Route::get('/counterparties/{counterparty}', [CounterpartyController::class, 'show']);
+		});
+		
+		Route::middleware(
+		'permission:agreements.counterparties.manage'
+		)->group(function () {
+			Route::post('/counterparties', [CounterpartyController::class, 'store']);
+			Route::put('/counterparties/{counterparty}', [CounterpartyController::class, 'update']);
+			Route::delete('/counterparties/{counterparty}', [CounterpartyController::class, 'destroy']);
+		});
+		
+		
 	});

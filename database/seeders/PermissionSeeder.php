@@ -63,6 +63,9 @@
             ['code' => 'agreements.types.manage', 'name' => 'Manage Agreement Types', 'module' => 'Agreements'],
             ['code' => 'agreements.status.manage', 'name' => 'Manage Agreement Statuses', 'module' => 'Agreements'],
             ['code' => 'agreements.audit.view', 'name' => 'View Agreement Audit Logs', 'module' => 'Agreements'],
+			
+			['code' => 'agreements.counterparties.manage','name' => 'Manage Agreement Counterparties','module' => 'Agreements',],
+			
 			];
 			
 			foreach ($permissions as $index => $permission) {

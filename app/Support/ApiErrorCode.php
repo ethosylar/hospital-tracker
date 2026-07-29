@@ -219,4 +219,14 @@
 		public const AGREEMENT_TYPE_UPDATE_FAILED = 'AGREEMENT_TYPE_UPDATE_FAILED';
 		public const AGREEMENT_TYPE_DELETE_FAILED = 'AGREEMENT_TYPE_DELETE_FAILED';
 		public const AGREEMENT_TYPE_PROTECTED = 'AGREEMENT_TYPE_PROTECTED';
+		
+		// ============================================================
+		// Agreement Counterparty (dt_counterparties)
+		// ============================================================
+		public const COUNTERPARTY_DUPLICATE ='COUNTERPARTY_DUPLICATE';
+		public const COUNTERPARTY_CREATE_FAILED ='COUNTERPARTY_CREATE_FAILED';
+		public const COUNTERPARTY_UPDATE_FAILED ='COUNTERPARTY_UPDATE_FAILED';
+		public const COUNTERPARTY_DELETE_FAILED ='COUNTERPARTY_DELETE_FAILED';
+		
+		
 	}
