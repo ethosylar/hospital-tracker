@@ -16,13 +16,11 @@
             'department_id' => (int) $this->department_id,
             'department' => $this->whenLoaded(
 			'department',
-			fn () => $this->department
-			? [
+			fn () => $this->department ? [
 			'id' => (int) $this->department->id,
 			'code' => $this->department->code,
 			'name' => $this->department->name,
-			]
-			: null
+			] : null
             ),
 			
             'owner_user_id' => (int) $this->owner_user_id,
@@ -33,8 +31,7 @@
 			'id' => (int) $this->owner->id,
 			'name' => $this->owner->name,
 			'email' => $this->owner->email,
-			]
-			: null
+			] : null
             ),
 			
             'counterparty_id' => (int) $this->counterparty_id,
@@ -52,8 +49,7 @@
 			$this->counterparty->trading_name,
 			'registration_no' =>
 			$this->counterparty->registration_no,
-			]
-			: null
+			] : null
             ),
 			
             'agreement_category_id' =>
@@ -66,8 +62,7 @@
 			'id' => (int) $this->category->id,
 			'code' => $this->category->code,
 			'name' => $this->category->name,
-			]
-			: null
+			] : null
             ),
 			
             'agreement_type_id' => $this->agreement_type_id
@@ -81,8 +76,7 @@
 			'id' => (int) $this->type->id,
 			'code' => $this->type->code,
 			'name' => $this->type->name,
-			]
-			: null
+			] : null
             ),
 			
             'agreement_status_id' =>
@@ -97,8 +91,7 @@
 			'name' => $this->status->name,
 			'is_terminal' =>
 			(bool) $this->status->is_terminal,
-			]
-			: null
+			] : null
             ),
 			
             'description' => $this->description,
@@ -117,11 +110,9 @@
             'lifecycle' => [
 			'type' => $this->lifecycle_type,
 			'parent_agreement_id' => $this->parent_agreement_id
-			? (int) $this->parent_agreement_id
-			: null,
+			? (int) $this->parent_agreement_id : null,
 			'root_agreement_id' => $this->root_agreement_id
-			? (int) $this->root_agreement_id
-			: null,
+			? (int) $this->root_agreement_id : null,
 			'revision_no' => (int) $this->revision_no,
 			'renewal_sequence' => (int) $this->renewal_sequence,
 			'is_current_version' =>
@@ -136,8 +127,7 @@
 			'agreement_no' =>
 			$this->parentAgreement->agreement_no,
 			'title' => $this->parentAgreement->title,
-			]
-			: null
+			] : null
             ),
 			
             'child_agreements' => $this->whenLoaded(
@@ -194,6 +184,13 @@
 			)
             ),
 			
+            'documents' => $this->whenLoaded(
+			'documents',
+			fn () => AgreementFileResource::collection(
+			$this->documents
+			)
+            ),
+			
             'lifecycle_events' => $this->whenLoaded(
 			'lifecycleEvents',
 			fn () => AgreementLifecycleEventResource::collection(
@@ -204,8 +201,7 @@
             'created_by_user_id' =>
 			(int) $this->created_by_user_id,
             'updated_by_user_id' => $this->updated_by_user_id
-			? (int) $this->updated_by_user_id
-			: null,
+			? (int) $this->updated_by_user_id : null,
 			
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

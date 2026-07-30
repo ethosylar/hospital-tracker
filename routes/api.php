@@ -36,6 +36,8 @@
 		AgreementCategoryController,
 		CounterpartyController,
 		AgreementController,
+		AgreementDocumentTypeController,
+		AgreementFileController,
 		
 	};
 	
@@ -585,6 +587,111 @@
 			Route::delete(
 			'/agreements/{agreement}/project-links/{link}',
 			[AgreementController::class, 'unlinkProject']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Document Type Read
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware(
+		'permission:agreements.view.own,agreements.view.department,agreements.view.all,agreements.create,agreements.documents.upload,agreements.document-types.manage'
+		)->group(function () {
+			Route::get(
+			'/agreement-document-types',
+			[AgreementDocumentTypeController::class, 'index']
+			);
+			
+			Route::get(
+			'/agreement-document-types/{documentType}',
+			[AgreementDocumentTypeController::class, 'show']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Document Type Management
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware(
+		'permission:agreements.document-types.manage'
+		)->group(function () {
+			Route::post(
+			'/agreement-document-types',
+			[AgreementDocumentTypeController::class, 'store']
+			);
+			
+			Route::put(
+			'/agreement-document-types/{documentType}',
+			[AgreementDocumentTypeController::class, 'update']
+			);
+			
+			Route::delete(
+			'/agreement-document-types/{documentType}',
+			[AgreementDocumentTypeController::class, 'destroy']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Document Read / Download
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware(
+		'permission:agreements.view.own,agreements.view.department,agreements.view.all'
+		)->group(function () {
+			Route::get(
+			'/agreements/{agreement}/documents',
+			[AgreementFileController::class, 'index']
+			);
+			
+			Route::get(
+			'/agreements/{agreement}/documents/{agreementFile}',
+			[AgreementFileController::class, 'show']
+			);
+			
+			Route::get(
+			'/agreements/{agreement}/documents/{agreementFile}/download',
+			[AgreementFileController::class, 'download']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Document Upload / Manage
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware(
+		'permission:agreements.documents.upload'
+		)->group(function () {
+			Route::post(
+			'/agreements/{agreement}/documents',
+			[AgreementFileController::class, 'store']
+			);
+			
+			Route::put(
+			'/agreements/{agreement}/documents/{agreementFile}',
+			[AgreementFileController::class, 'update']
+			);
+			
+			Route::delete(
+			'/agreements/{agreement}/documents/{agreementFile}',
+			[AgreementFileController::class, 'destroy']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Future OCR Request
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware(
+		'permission:agreements.documents.ocr'
+		)->group(function () {
+			Route::post(
+			'/agreements/{agreement}/documents/{agreementFile}/ocr/request',
+			[AgreementFileController::class, 'requestOcr']
 			);
 		});
 		

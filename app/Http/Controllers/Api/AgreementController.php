@@ -1399,6 +1399,17 @@
 				->orderByDesc('event_at')
 				->orderByDesc('id');
 			},
+			'documents' => function ($query) {
+				$query
+				->with([
+				'documentType:id,code,name,ocr_eligible',
+				'file.textExtraction',
+				'linkedBy:id,name,email',
+				])
+				->orderByDesc('is_current')
+				->orderByDesc('document_date')
+				->orderByDesc('id');
+			},
 			]);
 		}
 		
@@ -1719,4 +1730,4 @@
             'exception_class' => get_class($e),
 			];
 		}
-	}	
+	}		

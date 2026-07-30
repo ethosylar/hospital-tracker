@@ -122,7 +122,8 @@
 					
 					$stillReferenced =
                     DB::table('dt_project_files')->where('file_id', $file->id)->exists()
-                    || DB::table('dt_task_files')->where('file_id', $file->id)->exists();
+                    || DB::table('dt_task_files')->where('file_id', $file->id)->exists()
+					|| DB::table('dt_agreement_files')->where('file_id', $file->id)->exists();
 					
 					if (!$stillReferenced) {
 						// delete physical + record
@@ -287,7 +288,8 @@
 					
 					$stillReferenced =
                     DB::table('dt_project_files')->where('file_id', $file->id)->exists()
-                    || DB::table('dt_task_files')->where('file_id', $file->id)->exists();
+                    || DB::table('dt_task_files')->where('file_id', $file->id)->exists()
+					|| DB::table('dt_agreement_files')->where('file_id', $file->id)->exists();
 					
 					if (!$stillReferenced) {
 						Storage::disk($file->disk)->delete($file->path);

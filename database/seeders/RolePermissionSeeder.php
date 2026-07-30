@@ -124,6 +124,8 @@
 			'agreements.status.manage',
 			'agreements.audit.view',
 			'agreements.amend',
+			'agreements.document-types.manage',
+			//'agreements.documents.ocr',
 			
 			'agreements.counterparties.manage',
             ],
@@ -156,4 +158,4 @@
 				$role->permissions()->sync($permissionIds);
 			}
 		}
-	}			
+	}				

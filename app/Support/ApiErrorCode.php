@@ -252,6 +252,32 @@
 		public const AGREEMENT_PROJECT_LINK_FAILED = 'AGREEMENT_PROJECT_LINK_FAILED';
 		public const AGREEMENT_PROJECT_UNLINK_FAILED = 'AGREEMENT_PROJECT_UNLINK_FAILED';
 		
+		// ============================================================
+		// Agreement Document Type (lt_agreement_document_types)
+		// ============================================================
+		public const AGREEMENT_DOCUMENT_TYPE_CREATE_FAILED = 'AGREEMENT_DOCUMENT_TYPE_CREATE_FAILED';
+		public const AGREEMENT_DOCUMENT_TYPE_UPDATE_FAILED = 'AGREEMENT_DOCUMENT_TYPE_UPDATE_FAILED';
+		public const AGREEMENT_DOCUMENT_TYPE_DELETE_FAILED = 'AGREEMENT_DOCUMENT_TYPE_DELETE_FAILED';
+		public const AGREEMENT_DOCUMENT_TYPE_PROTECTED = 'AGREEMENT_DOCUMENT_TYPE_PROTECTED';
+		
+		// ============================================================
+		// Agreement Document File (dt_agreement_files)
+		// ============================================================
+		public const AGREEMENT_FILE_NOT_LINKED = 'AGREEMENT_FILE_NOT_LINKED';
+		public const AGREEMENT_FILE_UPLOAD_FAILED = 'AGREEMENT_FILE_UPLOAD_FAILED';
+		public const AGREEMENT_FILE_UPDATE_FAILED = 'AGREEMENT_FILE_UPDATE_FAILED';
+		public const AGREEMENT_FILE_DETACH_FAILED = 'AGREEMENT_FILE_DETACH_FAILED';
+		public const AGREEMENT_FILE_PHYSICAL_MISSING = 'AGREEMENT_FILE_PHYSICAL_MISSING';
+		public const AGREEMENT_FILE_INVALID_SUPERSEDES = 'AGREEMENT_FILE_INVALID_SUPERSEDES';
+		
+		
+		// ============================================================
+		// Agreement Document OCR (dt_file_text_extractions)
+		// ============================================================
+		public const AGREEMENT_OCR_DISABLED = 'AGREEMENT_OCR_DISABLED';
+		public const AGREEMENT_OCR_NOT_ELIGIBLE = 'AGREEMENT_OCR_NOT_ELIGIBLE';
+		public const AGREEMENT_OCR_ALREADY_PROCESSING = 'AGREEMENT_OCR_ALREADY_PROCESSING';
+		public const AGREEMENT_OCR_REQUEST_FAILED = 'AGREEMENT_OCR_REQUEST_FAILED';
 		
 		
 	}
