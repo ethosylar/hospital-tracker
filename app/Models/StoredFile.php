@@ -39,4 +39,14 @@
 		{
 			return $this->belongsTo(User::class, 'uploaded_by_user_id');
 		}
-	}	
+		
+		public function agreementLinks()
+		{
+			return $this->hasMany(AgreementFile::class, 'file_id');
+		}
+		
+		public function textExtraction()
+		{
+			return $this->hasOne(FileTextExtraction::class, 'file_id');
+		}
+	}		

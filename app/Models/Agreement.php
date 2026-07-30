@@ -198,6 +198,14 @@
 			);
 		}
 		
+		public function documents()
+		{
+			return $this->hasMany(
+			AgreementFile::class,
+			'agreement_id'
+			);
+		}
+		
 		public function createdBy()
 		{
 			return $this->belongsTo(User::class, 'created_by_user_id');
@@ -227,4 +235,4 @@
 		{
 			return $this->belongsTo(User::class, 'archived_by_user_id');
 		}
-	}	
+	}		
