@@ -279,5 +279,13 @@
 		public const AGREEMENT_OCR_ALREADY_PROCESSING = 'AGREEMENT_OCR_ALREADY_PROCESSING';
 		public const AGREEMENT_OCR_REQUEST_FAILED = 'AGREEMENT_OCR_REQUEST_FAILED';
 		
+		// ============================================================
+		// Project Budget Allocation (dt_project_budget_allocations)
+		// ============================================================
+		public const PROJECT_BUDGET_ALLOCATION_NOT_FOUND = 'PROJECT_BUDGET_ALLOCATION_NOT_FOUND';
+		public const PROJECT_BUDGET_ALLOCATION_CREATE_FAILED = 'PROJECT_BUDGET_ALLOCATION_CREATE_FAILED';
+		public const PROJECT_BUDGET_ALLOCATION_UPDATE_FAILED = 'PROJECT_BUDGET_ALLOCATION_UPDATE_FAILED';
+		public const PROJECT_BUDGET_ALLOCATION_DELETE_FAILED = 'PROJECT_BUDGET_ALLOCATION_DELETE_FAILED';
+		
 		
 	}

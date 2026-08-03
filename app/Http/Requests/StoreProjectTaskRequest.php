@@ -30,8 +30,8 @@
 			
 			'progress' => ['nullable','integer','min:0','max:100'],
 			
-			'start_date' => ['nullable','date'],
-			'end_date' => ['nullable','date','after_or_equal:start_date'],
+			'start_date' => ['required','nullable','date'],
+			'end_date' => ['required','nullable','date','after_or_equal:start_date'],
 			
 			'actual_start_date' => ['nullable','date'],
 			'actual_end_date' => ['nullable','date','after_or_equal:actual_start_date'],

@@ -68,9 +68,10 @@
 			
 			if ($exists) {
 				return ApiResponse::error(
-                ApiErrorCode::PROJECT_BUDGET_LINE_DUPLICATE_CODE,
-                'Duplicate code for this project and line_type',
-                409
+				ApiErrorCode::PROJECT_BUDGET_LINE_DUPLICATE_CODE,
+				'Duplicate code for this project and line_type',
+				[],
+				409
 				);
 			}
 			
@@ -90,9 +91,10 @@
 				} catch (\Throwable $e) {
 				report($e);
 				return ApiResponse::error(
-                ApiErrorCode::PROJECT_BUDGET_LINE_CREATE_FAILED,
-                'Failed to create budget line',
-                500
+				ApiErrorCode::PROJECT_BUDGET_LINE_CREATE_FAILED,
+				'Failed to create budget line',
+				[],
+				500
 				);
 			}
 		}
@@ -119,6 +121,7 @@
 				return ApiResponse::error(
                 ApiErrorCode::PROJECT_BUDGET_LINE_DUPLICATE_CODE,
                 'Duplicate code for this project and line_type',
+				[],
                 409
 				);
 			}
@@ -150,6 +153,7 @@
 				return ApiResponse::error(
                 ApiErrorCode::PROJECT_BUDGET_LINE_UPDATE_FAILED,
                 'Failed to update budget line',
+				[],
                 500
 				);
 			}
@@ -189,8 +193,9 @@
 				return ApiResponse::error(
                 ApiErrorCode::PROJECT_BUDGET_LINE_DELETE_FAILED,
                 'Failed to delete budget line',
+				[],
                 500
 				);
 			}
 		}
-	}	
+	}		
