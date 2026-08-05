@@ -18,7 +18,7 @@
 		public function rules(): array
 		{
 			return [
-            'line_type' => ['nullable','string','in:COST,FUNDING'],
+            'line_type' => ['nullable','string','in:COST,FUND'],
             'code' => ['required','string','max:50'],
             'name' => ['required','string','max:150'],
             'planned_amount' => ['nullable','numeric','min:0'],
