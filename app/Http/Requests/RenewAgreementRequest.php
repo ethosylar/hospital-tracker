@@ -37,7 +37,7 @@
 		{
 			return [
             'title' => ['nullable', 'string', 'max:255'],
-            'renewal_reason' => ['nullable', 'string'],
+            'renewal_reason' => ['required','nullable', 'string'],
 			
             'effective_date' => ['required', 'date'],
             'expiry_date' => [

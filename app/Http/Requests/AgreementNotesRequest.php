@@ -13,23 +13,29 @@
 		
 		protected function prepareForValidation(): void
 		{
-			foreach (['reason', 'notes'] as $field) {
+			foreach (['reason','notes',] as $field) {
 				if (!$this->has($field) || $this->input($field) === null) {
 					continue;
 				}
-				
 				$value = trim((string) $this->input($field));
-				$this->merge([
-                $field => $value === '' ? null : $value,
-				]);
+				$this->merge([$field => $value === '' ? null : $value,]);
 			}
 		}
 		
 		public function rules(): array
 		{
 			return [
-            'reason' => ['nullable', 'string'],
-            'notes' => ['nullable', 'string'],
+			'reason' => [
+			'required',
+			'string',
+			'max:5000',
+			],
+			
+			'notes' => [
+			'required',
+			'string',
+			'max:5000',
+			],
 			];
 		}
-	}	
+	}		
