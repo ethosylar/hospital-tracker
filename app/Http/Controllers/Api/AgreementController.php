@@ -32,9 +32,9 @@
 		{
 			$data = $request->validated();
 			
-			$query = $this->withSummaryRelations(
-            Agreement::query()
-			);
+			$this->synchroniseDateDrivenStatuses($request);
+			
+			$query = $this->withSummaryRelations(Agreement::query());
 			
 			$this->applyVisibilityScope($query, $request);
 			
@@ -160,7 +160,7 @@
 			if (!$this->canAccess($request, $agreement)) {
 				return $this->accessDenied();
 			}
-			
+			$agreement = $this->synchroniseDateDrivenStatus($agreement);
 			return new AgreementResource(
             $this->loadDetail($agreement)
 			);
@@ -485,10 +485,7 @@
 			}
 		}
 		
-		public function approve(
-        AgreementNotesRequest $request,
-        Agreement $agreement
-		) {
+		public function approve(AgreementNotesRequest $request, Agreement $agreement) {
 			if (!$this->canAccess($request, $agreement)) {
 				return $this->accessDenied();
 			}
@@ -503,18 +500,9 @@
 			}
 			
 			try {
-				$agreement = DB::transaction(function () use (
-                $agreement,
-                $request
-				) {
-					$approved = $this->statusByCode('APPROVED');
-					$active = $this->statusByCode('ACTIVE');
-					
-					$target = (
-                    $agreement->effective_date !== null
-                    && $agreement->effective_date->lte(today())
-					) ? $active : $approved;
-					
+				$agreement = DB::transaction(function () use ($agreement, $request) {
+					$targetCode = $this->statusCodeForDates($agreement);
+					$target = $this->statusByCode($targetCode);
 					$fromStatusId = (int) $agreement->agreement_status_id;
 					
 					// Only the approved amendment/renewal becomes the current
@@ -1730,4 +1718,143 @@
             'exception_class' => get_class($e),
 			];
 		}
-	}		
+		
+		private function statusCodeForDates(Agreement $agreement): string {
+			$today = today();
+			
+			/*
+				* Expiry takes priority.
+				*
+				* This is important for historical
+				* agreements entered into the system
+				* after they have already expired.
+			*/
+			if ($agreement->expiry_date !== null && $agreement->expiry_date->lt($today)) {
+				return 'EXPIRED';
+			}
+			
+			/*
+				* Not effective yet.
+			*/
+			if ($agreement->effective_date === null || $agreement->effective_date->gt($today)) {
+				return 'APPROVED';
+			}
+			
+			/*
+				* Agreement is effective.
+				*
+				* Determine whether it has entered
+				* the expiry warning period.
+			*/
+			if ($agreement->expiry_date !== null) {
+				$warningDays = $this->expiryWarningDays($agreement);
+				
+				$warningStart = $agreement->expiry_date->copy()->subDays($warningDays);
+				
+				if ($today->gte($warningStart)) {
+					return 'EXPIRING_SOON';
+				}
+			}
+			
+			return 'ACTIVE';
+		}
+		
+		private function expiryWarningDays(Agreement $agreement): int {
+			/*
+				* Explicit zero is respected.
+				*
+				* Null means no agreement-specific
+				* warning period was configured, so
+				* use 30 days.
+			*/
+			if ($agreement->notice_period_days !== null) {
+				return max(0, (int) $agreement->notice_period_days);
+			}
+			
+			return 30;
+		}
+		
+		private function synchroniseDateDrivenStatus(Agreement $agreement): Agreement {
+			/*
+				* Historical versions should retain
+				* their historical lifecycle status.
+			*/
+			if (!$agreement->is_current_version) {
+				return $agreement;
+			}
+			
+			$currentCode = $this->agreementStatusCode($agreement);
+			
+			/*
+				* Only operational/date-driven
+				* statuses are automatically
+				* reconciled.
+			*/
+			if (!in_array($currentCode, ['APPROVED','ACTIVE','EXPIRING_SOON','EXPIRED',], true)) {
+				return $agreement;
+			}
+			
+			$targetCode = $this->statusCodeForDates($agreement);
+			
+			if ($targetCode === $currentCode) {
+				return $agreement;
+			}
+			
+			$target = $this->statusByCode($targetCode);
+			
+			$agreement->update(['agreement_status_id' => $target->id,]);
+			
+			/*
+				* Prevent an already-loaded status
+				* relationship from remaining stale.
+			*/
+			$agreement->setRelation('status', $target);
+			
+			return $agreement;
+		}
+		
+		private function synchroniseDateDrivenStatuses(Request $request): void {
+			$managedStatusIds = 
+			AgreementStatus::query()
+			->where('is_active',true)
+			->whereIn('code', ['APPROVED','ACTIVE','EXPIRING_SOON','EXPIRED',])
+			->pluck('id')
+			->map(fn ($id) => (int) $id)
+			->all();
+			
+			if (empty($managedStatusIds)) {
+				return;
+			}
+			
+			$query = 
+			Agreement::query()
+			->with(['status:id,code',])
+			->where('is_current_version', true)
+			->whereIn('agreement_status_id', $managedStatusIds);
+			
+			/*
+				* Only reconcile agreements that
+				* this user is allowed to access.
+			*/
+			$this->applyVisibilityScope($query, $request);
+			
+			$query
+			->select([
+			'id',
+			'department_id',
+			'owner_user_id',
+			'agreement_status_id',
+			'is_current_version',
+			'effective_date',
+			'expiry_date',
+			'notice_period_days',
+			])
+			->chunkById(200,
+			function ($agreements) {
+				foreach ($agreements as $agreement) {
+					$this->synchroniseDateDrivenStatus($agreement);
+				}
+			}
+			);
+		}
+	}				
