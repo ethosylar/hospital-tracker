@@ -60,8 +60,53 @@
 			|--------------------------------------------------------------------------
 			| General Lookups
 			|--------------------------------------------------------------------------
+			|
+			| Lookup routes are:
+			|
+			| - authenticated
+			| - read only
+			| - minimal data
+			| - not management endpoints
+			|
+			| They intentionally do NOT require masterdata.manage.
+			|
 		*/
-		Route::get('/lookups', [LookupController::class, 'index']);
+		Route::prefix('lookup')->group(
+		function () {
+			
+			Route::get('/departments',[LookupController::class, 'departments',]);
+			Route::get('/users', [LookupController::class, 'users',]);
+			Route::get('/priorities', [LookupController::class, 'priorities',]);
+			Route::get('/project-statuses', [LookupController::class, 'projectStatuses',]);
+			Route::get('/task-statuses', [LookupController::class, 'taskStatuses',]);
+			Route::get('/risk-issue-statuses', [LookupController::class, 'riskIssueStatuses',]);
+			Route::get('/severities', [LookupController::class, 'severities',]);
+			Route::get('/risk-issue-types', [LookupController::class, 'riskIssueTypes',]);
+			Route::get('/project-categories', [LookupController::class, 'projectCategories',]);
+			Route::get('/external-sources', [LookupController::class, 'externalSources',]);
+			Route::get('/projects', [LookupController::class, 'projects',]);
+			
+			/*
+				* Agreement lookups
+			*/
+			Route::get('/agreement-statuses', [LookupController::class, 'agreementStatuses',]);
+			Route::get('/agreement-categories', [LookupController::class, 'agreementCategories',]);
+			Route::get('/agreement-types', [LookupController::class, 'agreementTypes',]);
+			Route::get('/counterparties', [LookupController::class, 'counterparties',]);
+			Route::get('/agreement-document-types', [LookupController::class, 'agreementDocumentTypes',]);
+		}
+		);
+		
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Legacy Combined Lookup
+			|--------------------------------------------------------------------------
+			|
+			| Keep temporarily until existing screens have migrated.
+			|
+		*/
+		Route::get('/lookups', [LookupController::class, 'index',]);
 		
 		/*
 			|--------------------------------------------------------------------------
