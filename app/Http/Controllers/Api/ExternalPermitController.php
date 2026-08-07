@@ -187,19 +187,16 @@
 		public function projectIndex(Project $project)
 		{
 			$permits = ExternalPermit::query()
-            ->where('is_source_deleted', false)
             ->whereHas('links', function ($q) use ($project) {
-                $q->where('project_id', $project->id)
-				->where('is_active', true);
+				$q->where('project_id', $project->id)
+			->where('is_active', true);
 			})
             ->with([
 			'source:id,code,name,base_url',
-			
 			'links' => function ($q) use ($project) {
 				$q->where('project_id', $project->id)
 				->where('is_active', true);
 			},
-			
 			'links.task:id,project_id,milestone_id,name',
 			'links.linkedBy:id,name,email',
             ])

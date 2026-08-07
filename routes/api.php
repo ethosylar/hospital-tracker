@@ -535,6 +535,7 @@
 		'permission:agreements.view.own,agreements.view.department,agreements.view.all'
 		)->group(function () {
 			Route::get('/agreements', [AgreementController::class, 'index']);
+			Route::get('/projects/{project}/agreements', [AgreementController::class, 'projectIndex',]);
 			Route::get('/agreements/{agreement}', [AgreementController::class, 'show']);
 		});
 		

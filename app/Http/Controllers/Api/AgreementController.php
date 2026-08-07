@@ -17,6 +17,7 @@
 	use App\Models\AgreementProjectLink;
 	use App\Models\AgreementStatus;
 	use App\Models\AgreementType;
+	use App\Models\Project;
 	use App\Support\ApiErrorCode;
 	use App\Support\ApiResponse;
 	use Carbon\Carbon;
@@ -164,6 +165,30 @@
 			return new AgreementResource(
             $this->loadDetail($agreement)
 			);
+		}
+		
+		public function projectIndex(Request $request, Project $project) {
+			$query = $this->withSummaryRelations(Agreement::query());
+			/*
+				* Only Agreements actually linked
+				* to this Project.
+			*/
+			$query->whereHas('projectLinks', function ($linkQuery) use ($project) {
+				$linkQuery->where('project_id', $project->id);
+			}
+			);
+			/*
+				* Agreement visibility rules still apply.
+				*
+				* A Project user must not automatically
+				* gain access to an Agreement simply
+				* because it is linked to the Project.
+			*/
+			$this->applyVisibilityScope($query, $request);
+			
+			return AgreementResource::collection($query->orderByDesc('is_current_version')
+			->orderByDesc('updated_at')
+			->get());
 		}
 		
 		public function store(StoreAgreementRequest $request)
@@ -1857,4 +1882,4 @@
 			}
 			);
 		}
-	}				
+	}					
