@@ -2,7 +2,9 @@
 	
 	namespace App\Http\Requests;
 	
+	use App\Support\AgreementDashboardFilter;
 	use Illuminate\Foundation\Http\FormRequest;
+	use Illuminate\Validation\Rule;
 	
 	class AgreementIndexRequest extends FormRequest
 	{
@@ -34,12 +36,26 @@
                 'search' => trim((string) $this->search),
 				]);
 			}
+			
+			if ($this->filled('dashboard_filter')) {
+				$this->merge([
+                'dashboard_filter' => strtolower(
+				trim((string) $this->dashboard_filter)
+                ),
+				]);
+			}
 		}
 		
 		public function rules(): array
 		{
 			return [
             'search' => ['nullable', 'string', 'max:255'],
+			
+            'dashboard_filter' => [
+			'nullable',
+			'string',
+			Rule::in(AgreementDashboardFilter::allowed()),
+            ],
 			
             'department_id' => [
 			'nullable',

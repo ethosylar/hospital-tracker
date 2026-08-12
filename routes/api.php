@@ -38,6 +38,7 @@
 		AgreementController,
 		AgreementDocumentTypeController,
 		AgreementFileController,
+		AgreementDashboardController,
 		
 	};
 	
@@ -528,11 +529,30 @@
 		
 		/*
 			|--------------------------------------------------------------------------
-			| Agreement Read
+			| Agreement Dashboard
 			|--------------------------------------------------------------------------
+			|
+			| Add AgreementDashboardController to the existing grouped controller import:
+			|
+			|     AgreementDashboardController,
+			|
+			| This endpoint deliberately uses Agreement view permissions instead of
+			| dashboard.view so Agreement-only users are not tied to the Project dashboard.
+			|
 		*/
 		Route::middleware(
 		'permission:agreements.view.own,agreements.view.department,agreements.view.all'
+		)->group(function () {
+			Route::get('/agreements/dashboard/overview', [AgreementDashboardController::class, 'overview']
+			);
+		});
+		
+		/*
+			|--------------------------------------------------------------------------
+			| Agreement Read
+			|--------------------------------------------------------------------------
+		*/
+		Route::middleware('permission:agreements.view.own,agreements.view.department,agreements.view.all'
 		)->group(function () {
 			Route::get('/agreements', [AgreementController::class, 'index']);
 			Route::get('/projects/{project}/agreements', [AgreementController::class, 'projectIndex',]);

@@ -20,6 +20,7 @@
 	use App\Models\Project;
 	use App\Support\ApiErrorCode;
 	use App\Support\ApiResponse;
+	use App\Support\AgreementDashboardFilter;
 	use Carbon\Carbon;
 	use Illuminate\Database\Eloquent\Builder;
 	use Illuminate\Http\Request;
@@ -32,20 +33,25 @@
 		public function index(AgreementIndexRequest $request)
 		{
 			$data = $request->validated();
-			
-			$this->synchroniseDateDrivenStatuses($request);
-			
 			$query = $this->withSummaryRelations(Agreement::query());
-			
 			$this->applyVisibilityScope($query, $request);
 			
+			// Shared dashboard-card definition.
+			if (!empty($data['dashboard_filter'])) {
+				AgreementDashboardFilter::apply(
+				$query,
+				$data['dashboard_filter'],
+				today()->startOfDay()
+				);
+			}
+			
 			foreach ([
-            'department_id',
-            'owner_user_id',
-            'counterparty_id',
-            'agreement_category_id',
-            'agreement_type_id',
-            'agreement_status_id',
+			'department_id',
+			'owner_user_id',
+			'counterparty_id',
+			'agreement_category_id',
+			'agreement_type_id',
+			'agreement_status_id',
 			] as $field) {
 				if (array_key_exists($field, $data)) {
 					$query->where($field, (int) $data[$field]);
@@ -54,67 +60,73 @@
 			
 			if (!empty($data['status_code'])) {
 				$query->whereHas(
-                'status',
-                fn ($statusQuery) => $statusQuery->where(
-				'code',
-				strtoupper($data['status_code'])
-                )
+				'status',
+				fn ($statusQuery) => $statusQuery->where(
+                'code',
+                strtoupper($data['status_code'])
+				)
 				);
 			}
 			
 			if (!empty($data['lifecycle_type'])) {
 				$query->where(
-                'lifecycle_type',
-                $data['lifecycle_type']
+				'lifecycle_type',
+				$data['lifecycle_type']
 				);
 			}
 			
 			if (array_key_exists('is_current_version', $data)) {
 				$query->where(
-                'is_current_version',
-                (bool) $data['is_current_version']
+				'is_current_version',
+				(bool) $data['is_current_version']
 				);
 			}
 			
 			if (!empty($data['effective_from'])) {
 				$query->whereDate(
-                'effective_date',
-                '>=',
-                $data['effective_from']
+				'effective_date',
+				'>=',
+				$data['effective_from']
 				);
 			}
 			
 			if (!empty($data['effective_to'])) {
 				$query->whereDate(
-                'effective_date',
-                '<=',
-                $data['effective_to']
+				'effective_date',
+				'<=',
+				$data['effective_to']
 				);
 			}
 			
 			if (!empty($data['expiry_from'])) {
 				$query->whereDate(
-                'expiry_date',
-                '>=',
-                $data['expiry_from']
+				'expiry_date',
+				'>=',
+				$data['expiry_from']
 				);
 			}
 			
 			if (!empty($data['expiry_to'])) {
 				$query->whereDate(
-                'expiry_date',
-                '<=',
-                $data['expiry_to']
+				'expiry_date',
+				'<=',
+				$data['expiry_to']
 				);
 			}
 			
-			if (empty($data['include_archived'])) {
+			// Normal list behavior still hides ARCHIVED by default.
+			// Dashboard filters own their exact card definition and therefore bypass
+			// this additional implicit filter.
+			if (
+			empty($data['include_archived'])
+			&& empty($data['dashboard_filter'])
+			) {
 				$query->whereDoesntHave(
-                'status',
-                fn ($statusQuery) => $statusQuery->where(
-				'code',
-				'ARCHIVED'
-                )
+				'status',
+				fn ($statusQuery) => $statusQuery->where(
+                'code',
+                'ARCHIVED'
+				)
 				);
 			}
 			
@@ -123,12 +135,12 @@
 				
 				$query->where(function ($where) use ($search) {
 					$where
-                    ->where('agreement_no', 'like', "%{$search}%")
-                    ->orWhere('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhereHas(
-					'counterparty',
-					fn ($counterpartyQuery) => $counterpartyQuery
+					->where('agreement_no', 'like', "%{$search}%")
+					->orWhere('title', 'like', "%{$search}%")
+					->orWhere('description', 'like', "%{$search}%")
+					->orWhereHas(
+                    'counterparty',
+                    fn ($counterpartyQuery) => $counterpartyQuery
 					->where(
 					'legal_name',
 					'like',
@@ -139,20 +151,16 @@
 					'like',
 					"%{$search}%"
 					)
-                    );
+					);
 				});
 			}
 			
-			$perPage = max(
-            1,
-            min((int) ($data['per_page'] ?? 50), 100)
-			);
-			
+			$perPage = max(1, min((int) ($data['per_page'] ?? 50), 100));
 			return AgreementResource::collection(
-            $query
-			->orderByDesc('is_current_version')
-			->orderByDesc('updated_at')
-			->paginate($perPage)
+			$query
+            ->orderByDesc('is_current_version')
+            ->orderByDesc('updated_at')
+            ->paginate($perPage)
 			);
 		}
 		
@@ -1882,4 +1890,4 @@
 			}
 			);
 		}
-	}					
+	}								
