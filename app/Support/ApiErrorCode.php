@@ -288,4 +288,10 @@
 		public const PROJECT_BUDGET_ALLOCATION_DELETE_FAILED = 'PROJECT_BUDGET_ALLOCATION_DELETE_FAILED';
 		
 		
+		// ============================================================
+		// Agreement Dashboard (dt_agreements)
+		// ============================================================
+		public const AGREEMENT_DASHBOARD_LOAD_FAILED = 'AGREEMENT_DASHBOARD_LOAD_FAILED';
+		
+		
 	}
