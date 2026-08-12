@@ -169,7 +169,7 @@
 			if (!$this->canAccess($request, $agreement)) {
 				return $this->accessDenied();
 			}
-			$agreement = $this->synchroniseDateDrivenStatus($agreement);
+			//$agreement = $this->synchroniseDateDrivenStatus($agreement);
 			return new AgreementResource(
             $this->loadDetail($agreement)
 			);
@@ -534,7 +534,7 @@
 			
 			try {
 				$agreement = DB::transaction(function () use ($agreement, $request) {
-					$targetCode = $this->statusCodeForDates($agreement);
+					$targetCode = $this->statusCodeAfterApproval($agreement);
 					$target = $this->statusByCode($targetCode);
 					$fromStatusId = (int) $agreement->agreement_status_id;
 					
@@ -1754,41 +1754,174 @@
 		
 		private function statusCodeForDates(Agreement $agreement): string {
 			$today = today();
-			
+			$currentCode = $this->agreementStatusCode($agreement);
 			/*
-				* Expiry takes priority.
-				*
-				* This is important for historical
-				* agreements entered into the system
-				* after they have already expired.
+				|--------------------------------------------------------------------------
+				| Terminal / workflow statuses
+				|--------------------------------------------------------------------------
+				|
+				| Date reconciliation should never interfere
+				| with these statuses.
+				|
+			*/
+			if (!in_array($currentCode, ['APPROVED','ACTIVE','EXPIRING_SOON','EXPIRED',], true)) {
+				return $currentCode;
+			}
+			/*
+				|--------------------------------------------------------------------------
+				| Already expired
+				|--------------------------------------------------------------------------
+			*/
+			if ($currentCode === 'EXPIRED') {
+				return 'EXPIRED';
+			}
+			/*
+				|--------------------------------------------------------------------------
+				| Expiry has passed
+				|--------------------------------------------------------------------------
+				|
+				| ACTIVE / EXPIRING_SOON can move forward
+				| to EXPIRED.
+				|
+				| APPROVED historical agreements can also
+				| be recognized as expired.
+				|
 			*/
 			if ($agreement->expiry_date !== null && $agreement->expiry_date->lt($today)) {
 				return 'EXPIRED';
 			}
 			
 			/*
-				* Not effective yet.
+				|--------------------------------------------------------------------------
+				| Agreement is still only APPROVED
+				|--------------------------------------------------------------------------
+				|
+				| NULL effective date means:
+				|
+				| "Wait for manual activation."
+				|
+				| It does NOT mean an ACTIVE agreement
+				| should be downgraded back to APPROVED.
+				|
 			*/
-			if ($agreement->effective_date === null || $agreement->effective_date->gt($today)) {
-				return 'APPROVED';
+			if ($currentCode === 'APPROVED') {
+				if ($agreement->effective_date === null) {
+					return 'APPROVED';
+				}
+				if ($agreement->effective_date->gt($today)) {
+					return 'APPROVED';
+				}
+				/*
+					* Effective date has arrived.
+					* Continue below and determine
+					* ACTIVE / EXPIRING_SOON.
+				*/
 			}
-			
 			/*
-				* Agreement is effective.
-				*
-				* Determine whether it has entered
-				* the expiry warning period.
+				|--------------------------------------------------------------------------
+				| Expiring Soon
+				|--------------------------------------------------------------------------
 			*/
 			if ($agreement->expiry_date !== null) {
-				$warningDays = $this->expiryWarningDays($agreement);
-				
+				$warningDays = $agreement->notice_period_days !== null ? max(0, (int) $agreement->notice_period_days) : 30;
 				$warningStart = $agreement->expiry_date->copy()->subDays($warningDays);
-				
 				if ($today->gte($warningStart)) {
 					return 'EXPIRING_SOON';
 				}
 			}
 			
+			/*
+				|--------------------------------------------------------------------------
+				| ACTIVE
+				|--------------------------------------------------------------------------
+				|
+				| This includes:
+				|
+				| ACTIVE + effective_date NULL
+				| ACTIVE + expiry_date NULL
+				|
+				| Manual activation is respected.
+				|
+			*/
+			return 'ACTIVE';
+		}
+		
+		private function statusCodeAfterApproval(Agreement $agreement): string {
+			$today = today()->startOfDay();
+			/*
+				|--------------------------------------------------------------------------
+				| 1. Already expired based on entered dates
+				|--------------------------------------------------------------------------
+				|
+				| This is important when historical Agreements are entered into
+				| HPMS today.
+				|
+				| Example:
+				|
+				| Effective Date: 2024-01-01
+				| Expiry Date:    2025-12-31
+				| Approved today: 2026-08-12
+				|
+				| It should immediately become EXPIRED.
+				|
+			*/
+			if ($agreement->expiry_date !== null && $agreement->expiry_date->copy()->startOfDay()->lt($today)) {
+				return 'EXPIRED';
+			}
+			/*
+				|--------------------------------------------------------------------------
+				| 2. No effective date
+				|--------------------------------------------------------------------------
+				|
+				| Approval does NOT automatically activate an Agreement that has
+				| no effective date.
+				|
+				| It remains APPROVED until an authorised user explicitly clicks
+				| Activate.
+				|
+			*/
+			if ($agreement->effective_date === null) {
+				return 'APPROVED';
+			}
+			
+			/*
+				|--------------------------------------------------------------------------
+				| 3. Effective date is still in the future
+				|--------------------------------------------------------------------------
+				|
+				| Approved but not yet effective.
+				|
+			*/
+			if ($agreement->effective_date->copy()->startOfDay()->gt($today)) {
+				return 'APPROVED';
+			}
+			
+			/*
+				|--------------------------------------------------------------------------
+				| 4. Agreement is already within its expiry warning period
+				|--------------------------------------------------------------------------
+				|
+				| This handles Agreements entered retrospectively or Agreements
+				| approved very close to their expiry date.
+				|
+			*/
+			if ($agreement->expiry_date !== null) {
+				$warningDays = $this->expiryWarningDays($agreement);
+				$warningStart = $agreement->expiry_date->copy()->startOfDay()->subDays($warningDays);
+				if ($today->gte($warningStart)) {
+					return 'EXPIRING_SOON';
+				}
+			}
+			
+			/*
+				|--------------------------------------------------------------------------
+				| 5. Effective date has arrived
+				|--------------------------------------------------------------------------
+				|
+				| Approved Agreement whose effective date is today or earlier
+				| becomes ACTIVE immediately.
+				|
+			*/
 			return 'ACTIVE';
 		}
 		
@@ -1890,4 +2023,4 @@
 			}
 			);
 		}
-	}								
+	}										
