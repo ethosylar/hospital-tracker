@@ -397,7 +397,8 @@
 			Route::apiResource('risk-issue-types', RiskIssueTypeController::class)->parameters(['risk-issue-types' => 'type'])
 			->except(['create', 'edit']);
 			
-			Route::apiResource('project-categories', ProjectCategoryController::class)->except(['create', 'edit']);
+			Route::apiResource('project-categories', ProjectCategoryController::class)->parameters(['project-categories' => 'category',])
+			->except(['create', 'edit']);
 		});
 		
 		/*
