@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateDepartmentRequest extends FormRequest
 {
@@ -11,14 +12,57 @@ class UpdateDepartmentRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('code')) {
+            $this->merge([
+                'code' => strtoupper(
+                    trim((string) $this->code)
+                ),
+            ]);
+        }
+
+        if ($this->has('name')) {
+            $this->merge([
+                'name' => trim((string) $this->name),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
-        $id = $this->route('department'); // route param name
-
         return [
-            'code' => ['sometimes','string','max:50',"unique:lt_departments,code,{$id}"],
-            'name' => ['sometimes','string','max:150'],
-            'is_active' => ['nullable','boolean'],
+            'site_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                Rule::exists('lt_sites', 'id')
+                    ->where(
+                        fn($query) => $query->where(
+                            'is_active',
+                            true
+                        )
+                    ),
+            ],
+
+            'code' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'name' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:150',
+            ],
+
+            'is_active' => [
+                'sometimes',
+                'boolean',
+            ],
         ];
     }
 }

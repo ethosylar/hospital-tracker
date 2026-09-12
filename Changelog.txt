@@ -1,0 +1,45 @@
+| ID      | Requirement                           | Priority | Status |
+| ------- | ------------------------------------- | -------- | ------ |
+| MS-01   | Multi-Site management                 | Critical |        |
+| MS-02   | User-Site access assignment           | Critical |        |
+| MS-03   | Site Admin role/access                | Critical |        |
+| MS-04   | Cross-site HQ access                  | Critical |        |
+| PM-01   | Project Location                      | Medium   |        |
+| UI-01   | Searchable dropdowns                  | High     |        |
+| VEN-01  | Reuse Counterparty as Vendor          | High     |        |
+| VEN-02  | Multiple Vendors per Project          | High     |        |
+| VEN-03  | Vendor user accounts                  | High     |        |
+| VEN-04  | Vendor-specific Project access        | High     |        |
+| VEN-05  | Vendor update submission              | High     |        |
+| VEN-06  | Vendor performance dashboard          | Medium   |        |
+| FIN-01  | Project financial tracking entries    | High     |        |
+| FIN-02  | Advance/progress payment tracking     | High     |        |
+| PM-02   | Department/project contributor access | Medium   |        |
+| PM-03   | PM/PMO review workflow                | High     |        |
+| DASH-01 | Clickable Project status cards        | High     |        |
+| DATA-01 | Excel export                          | High     |        |
+| DATA-02 | Validated data import                 | Medium   |        |
+| SEC-01  | Fine-grained permissions              | Critical |        |
+| SEC-02  | Site + record-level scopes            | Critical |        |
+| QA-01   | Data quality dashboard                | Medium   |        |
+| QA-02   | Stale-data tracking                   | Medium   |        |
+| AI-01   | Local HPMS AI assistant               | Future   |        |
+
+
+Phase 1A  Sites + User-Site Access          ✓ DONE
+    ↓
+Phase 1B  Site-aware Departments            ← NEXT
+    ↓
+Phase 1C  Site-aware Projects
+    ↓
+Phase 1D  Site-aware Agreements
+    ↓
+Phase 1E  Dashboard + Lookup Site Scoping
+    ↓
+Phase 1F  SITE_ADMIN + finer permissions
+    ↓
+Phase 2   Project Location
+    ↓
+Phase 3   Project Vendors / Vendor Users
+    ↓
+Phase 4   Financial Tracking

@@ -111,6 +111,40 @@
                 ->where('lt_permissions.is_active', true);
 			},
 			]);
+
+			$user->loadMissing(['siteAccesses.site',]);
+
+			$primarySiteAccess = $user->siteAccesses
+				->first(fn ($access) => $access->is_primary && $access->is_active);
+
+			$siteFields = [
+				'primary_site' => $primarySiteAccess?->site ? [
+					'id' => (int) $primarySiteAccess->site->id,
+					'code' => $primarySiteAccess->site->code,
+					'name' => $primarySiteAccess->site->name,
+					'short_name' => $primarySiteAccess->site->short_name,
+					'site_type' => $primarySiteAccess->site->site_type,
+				] : null,
+
+				'site_accesses' => $user->siteAccesses
+					->filter(
+						fn ($access) => $access->is_active
+							&& $access->site?->is_active
+					)
+					->map(fn ($access) => [
+						'site_id' => (int) $access->site_id,
+						'access_level' => $access->access_level,
+						'is_primary' => (bool) $access->is_primary,
+						'site' => [
+							'id' => (int) $access->site->id,
+							'code' => $access->site->code,
+							'name' => $access->site->name,
+							'short_name' => $access->site->short_name,
+							'site_type' => $access->site->site_type,
+						],
+					])
+					->values(),
+			];
 			
 			foreach ($user->roles as $role) {
 				$role->makeHidden('pivot');
