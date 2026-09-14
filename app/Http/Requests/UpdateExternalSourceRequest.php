@@ -14,28 +14,97 @@ class UpdateExternalSourceRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->has('code')) $this->merge(['code' => strtoupper(trim((string) $this->code))]);
-        if ($this->has('name')) $this->merge(['name' => trim((string) $this->name)]);
+        $data = [];
+
+        if ($this->has('code')) {
+            $data['code'] = strtoupper(trim((string) $this->input('code')));
+        }
+
+        if ($this->has('name')) {
+            $data['name'] = trim((string) $this->input('name'));
+        }
+
         if ($this->has('base_url')) {
-            $v = $this->base_url;
-            $this->merge(['base_url' => $v === null ? null : trim((string) $v)]);
+            $value = $this->input('base_url');
+            $data['base_url'] = $value === null ? null : trim((string) $value);
+        }
+
+        if ($data) {
+            $this->merge($data);
         }
     }
 
     public function rules(): array
     {
-        $source = $this->route('source'); // model OR id (ignore() handles both)
+        $source = $this->route('source');
+        $sourceId = is_object($source) ? (int) $source->id : (int) $source;
+        $candidateSiteId =
+            $this->has('site_id')
+            ? (int) $this->input('site_id')
+            : (
+                is_object($source)
+                ? (int) $source->site_id
+                : 0
+            );
 
         return [
+            'site_id' => [
+                'sometimes',
+                'required',
+                'integer',
+
+                Rule::exists(
+                    'lt_sites',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where(
+                        'is_active',
+                        true
+                    )
+                ),
+            ],
+
             'code' => [
                 'sometimes',
+                'required',
                 'string',
                 'max:50',
-                Rule::unique('lt_external_sources', 'code')->ignore($source),
+
+                Rule::unique(
+                    'lt_external_sources',
+                    'code'
+                )
+                    ->where(
+                        fn($query) =>
+                        $query->where(
+                            'site_id',
+                            $candidateSiteId
+                        )
+                    )
+                    ->ignore(
+                        $sourceId
+                    ),
             ],
-            'name' => ['sometimes','string','max:150'],
-            'base_url' => ['sometimes','nullable','string','max:255'],
-            'is_active' => ['sometimes','nullable','boolean'],
+
+            'name' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:150',
+            ],
+
+            'base_url' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'is_active' => [
+                'sometimes',
+                'boolean',
+            ],
         ];
     }
 }

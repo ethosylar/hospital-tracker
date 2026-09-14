@@ -5,6 +5,9 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EnsureProjectSiteAccess;
 use App\Http\Middleware\EnsureTaskSiteAccess;
+use App\Http\Middleware\EnsureAgreementSiteAccess;
+use App\Http\Middleware\EnsureExternalPermitSiteAccess;
+use App\Http\Middleware\EnsureIntegrationSyncRunSiteAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
 	->withRouting(
@@ -19,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
 			'permission' => \App\Http\Middleware\PermissionMiddleware::class,
 			'project.site' => EnsureProjectSiteAccess::class,
 			'task.site' => EnsureTaskSiteAccess::class,
+			'agreement.site' => EnsureAgreementSiteAccess::class,
+			'permit.site' => EnsureExternalPermitSiteAccess::class,
+			'sync-run.site' => EnsureIntegrationSyncRunSiteAccess::class,
 		]);
 	})
 	->withExceptions(function (Exceptions $exceptions): void {

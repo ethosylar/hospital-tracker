@@ -143,6 +143,7 @@ Route::middleware('auth:sanctum')->group(function () {
 	Route::middleware('permission:permits.sync')->group(function () {
 		Route::post('/integrations/eptw/sync', [EptwSyncController::class, 'sync']);
 		Route::post('/integrations/eptw/sync-one', [EptwSyncController::class, 'syncOne']);
+		Route::post('/integrations/eptw/import-test', [EptwImportController::class, 'store']);
 	});
 
 	/*
@@ -302,9 +303,10 @@ Route::middleware('auth:sanctum')->group(function () {
 		*/
 	Route::middleware('permission:permits.read')->group(function () {
 		Route::get('/external-permits', [ExternalPermitController::class, 'index']);
-		Route::get('/external-permits/{permit}', [ExternalPermitController::class, 'show']);
+		//Route::get('/external-permits/{permit}', [ExternalPermitController::class, 'show']);
+		Route::get('/external-permits/{permit}', [ExternalPermitController::class, 'show'])->middleware('permit.site');
 		Route::get('/projects/{project}/permits', [ExternalPermitController::class, 'projectIndex']);
-		Route::get('/tasks/{task}/permits', [ExternalPermitController::class, 'taskIndex']);
+		Route::get('/tasks/{task}/permits', [ExternalPermitController::class, 'taskIndex'])->middleware('permit.site');
 		Route::get('/projects/{project}/milestones/{milestone}/permits', [ExternalPermitController::class, 'milestoneIndex']);
 	});
 
@@ -313,18 +315,9 @@ Route::middleware('auth:sanctum')->group(function () {
 			| Permit Link
 			|--------------------------------------------------------------------------
 		*/
-	Route::middleware('permission:permits.link')->group(function () {
+	Route::middleware(['permission:permits.link', '/projects/{project}/permit-links'])->group(function () {
 		Route::post('/projects/{project}/permit-links', [ProjectPermitLinkController::class, 'store']);
 		Route::delete('/projects/{project}/permit-links/{link}', [ProjectPermitLinkController::class, 'destroy']);
-	});
-
-	/*
-			|--------------------------------------------------------------------------
-			| Test Permit Sync
-			|--------------------------------------------------------------------------
-		*/
-	Route::middleware('permission:permits.sync')->group(function () {
-		Route::post('/integrations/eptw/import-test', [EptwImportController::class, 'store']);
 	});
 
 	/*
@@ -340,9 +333,9 @@ Route::middleware('auth:sanctum')->group(function () {
 	Route::middleware('permission:audit.view')->group(function () {
 		Route::get('/audit-logs', [AuditLogController::class, 'index']);
 		Route::get('/audit-logs/{id}', [AuditLogController::class, 'show']);
-
 		Route::get('/integrations/eptw/sync-runs', [IntegrationSyncRunController::class, 'index']);
-		Route::get('/integrations/eptw/sync-runs/{run}', [IntegrationSyncRunController::class, 'show']);
+		// Route::get('/integrations/eptw/sync-runs/{run}', [IntegrationSyncRunController::class, 'show']);
+		Route::get('/integrations/eptw/sync-runs/{run}', [IntegrationSyncRunController::class, 'show'])->middleware('sync-run.site');
 	});
 
 	/*
@@ -402,21 +395,14 @@ Route::middleware('auth:sanctum')->group(function () {
 		*/
 	Route::middleware('permission:masterdata.manage')->group(function () {
 		Route::apiResource('departments', DepartmentController::class)->except(['create', 'edit']);
-		Route::apiResource('project-statuses', ProjectStatusController::class)->parameters(['project-statuses' => 'status'])
-			->except(['create', 'edit']);
-		Route::apiResource('task-statuses', TaskStatusController::class)->parameters(['task-statuses' => 'status'])
-			->except(['create', 'edit']);
-		Route::apiResource('risk-statuses', RiskIssueStatusController::class)->parameters(['risk-statuses' => 'status'])
-			->except(['create', 'edit']);
-		Route::apiResource('severities', SeverityController::class)->parameters(['severities' => 'severity'])
-			->except(['create', 'edit']);
+		Route::apiResource('project-statuses', ProjectStatusController::class)->parameters(['project-statuses' => 'status'])->except(['create', 'edit']);
+		Route::apiResource('task-statuses', TaskStatusController::class)->parameters(['task-statuses' => 'status'])->except(['create', 'edit']);
+		Route::apiResource('risk-statuses', RiskIssueStatusController::class)->parameters(['risk-statuses' => 'status'])->except(['create', 'edit']);
+		Route::apiResource('severities', SeverityController::class)->parameters(['severities' => 'severity'])->except(['create', 'edit']);
 		Route::apiResource('priorities', PriorityController::class)->except(['create', 'edit']);
-		Route::apiResource('external-sources', ExternalSourceController::class)->parameters(['external-sources' => 'source'])
-			->except(['create', 'edit']);
-		Route::apiResource('risk-issue-types', RiskIssueTypeController::class)->parameters(['risk-issue-types' => 'type'])
-			->except(['create', 'edit']);
-		Route::apiResource('project-categories', ProjectCategoryController::class)->parameters(['project-categories' => 'category',])
-			->except(['create', 'edit']);
+		Route::apiResource('external-sources', ExternalSourceController::class)->parameters(['external-sources' => 'source'])->except(['create', 'edit']);
+		Route::apiResource('risk-issue-types', RiskIssueTypeController::class)->parameters(['risk-issue-types' => 'type'])->except(['create', 'edit']);
+		Route::apiResource('project-categories', ProjectCategoryController::class)->parameters(['project-categories' => 'category',])->except(['create', 'edit']);
 	});
 
 	/*
@@ -559,8 +545,13 @@ Route::middleware('auth:sanctum')->group(function () {
 		'permission:agreements.view.own,agreements.view.department,agreements.view.all'
 	)->group(function () {
 		Route::get('/agreements', [AgreementController::class, 'index']);
-		Route::get('/projects/{project}/agreements', [AgreementController::class, 'projectIndex',]);
-		Route::get('/agreements/{agreement}', [AgreementController::class, 'show']);
+		//Route::get('/agreements/{agreement}', [AgreementController::class, 'show']);
+		Route::middleware('agreement.site')->group(function () {
+			Route::get('/agreements/{agreement}', [AgreementController::class, 'show']);
+		});
+		Route::middleware(['permission:projects.read', 'project.site',])->group(function () {
+			Route::get('/projects/{project}/agreements', [AgreementController::class, 'projectIndex']);
+		});
 	});
 
 	/*
@@ -572,18 +563,10 @@ Route::middleware('auth:sanctum')->group(function () {
 		Route::post('/agreements', [AgreementController::class, 'store']);
 	});
 
-	Route::middleware('permission:agreements.edit')->group(function () {
+	Route::middleware(['permission:agreements.edit', 'agreement.site'])->group(function () {
 		Route::put('/agreements/{agreement}', [AgreementController::class, 'update']);
-
-		Route::post(
-			'/agreements/{agreement}/review',
-			[AgreementController::class, 'review']
-		);
-
-		Route::post(
-			'/agreements/{agreement}/cancel',
-			[AgreementController::class, 'cancel']
-		);
+		Route::post('/agreements/{agreement}/review', [AgreementController::class, 'review']);
+		Route::post('/agreements/{agreement}/cancel', [AgreementController::class, 'cancel']);
 	});
 
 	/*
@@ -591,23 +574,13 @@ Route::middleware('auth:sanctum')->group(function () {
 			| Submission and Approval
 			|--------------------------------------------------------------------------
 		*/
-	Route::middleware('permission:agreements.submit')->group(function () {
-		Route::post(
-			'/agreements/{agreement}/submit',
-			[AgreementController::class, 'submit']
-		);
+	Route::middleware(['permission:agreements.submit', 'agreement.site',])->group(function () {
+		Route::post('/agreements/{agreement}/submit', [AgreementController::class, 'submit']);
 	});
 
-	Route::middleware('permission:agreements.approve')->group(function () {
-		Route::post(
-			'/agreements/{agreement}/approve',
-			[AgreementController::class, 'approve']
-		);
-
-		Route::post(
-			'/agreements/{agreement}/activate',
-			[AgreementController::class, 'activate']
-		);
+	Route::middleware(['permission:agreements.approve', 'agreement.site'])->group(function () {
+		Route::post('/agreements/{agreement}/approve', [AgreementController::class, 'approve']);
+		Route::post('/agreements/{agreement}/activate', [AgreementController::class, 'activate']);
 	});
 
 	/*
@@ -615,32 +588,20 @@ Route::middleware('auth:sanctum')->group(function () {
 			| Amendment, Renewal, Termination, Archive
 			|--------------------------------------------------------------------------
 		*/
-	Route::middleware('permission:agreements.amend')->group(function () {
-		Route::post(
-			'/agreements/{agreement}/amend',
-			[AgreementController::class, 'amend']
-		);
+	Route::middleware(['permission:agreements.amend', 'agreement.site'])->group(function () {
+		Route::post('/agreements/{agreement}/amend', [AgreementController::class, 'amend']);
 	});
 
-	Route::middleware('permission:agreements.renew')->group(function () {
-		Route::post(
-			'/agreements/{agreement}/renew',
-			[AgreementController::class, 'renew']
-		);
+	Route::middleware(['permission:agreements.renew', 'agreement.site'])->group(function () {
+		Route::post('/agreements/{agreement}/renew', [AgreementController::class, 'renew']);
 	});
 
-	Route::middleware('permission:agreements.terminate')->group(function () {
-		Route::post(
-			'/agreements/{agreement}/terminate',
-			[AgreementController::class, 'terminate']
-		);
+	Route::middleware(['permission:agreements.terminate', 'agreement.site'])->group(function () {
+		Route::post('/agreements/{agreement}/terminate', [AgreementController::class, 'terminate']);
 	});
 
-	Route::middleware('permission:agreements.archive')->group(function () {
-		Route::post(
-			'/agreements/{agreement}/archive',
-			[AgreementController::class, 'archive']
-		);
+	Route::middleware(['permission:agreements.archive', 'agreement.site'])->group(function () {
+		Route::post('/agreements/{agreement}/archive', [AgreementController::class, 'archive']);
 	});
 
 	/*
@@ -648,16 +609,9 @@ Route::middleware('auth:sanctum')->group(function () {
 			| Agreement Project Links
 			|--------------------------------------------------------------------------
 		*/
-	Route::middleware('permission:agreements.projects.link')->group(function () {
-		Route::post(
-			'/agreements/{agreement}/project-links',
-			[AgreementController::class, 'linkProject']
-		);
-
-		Route::delete(
-			'/agreements/{agreement}/project-links/{link}',
-			[AgreementController::class, 'unlinkProject']
-		);
+	Route::middleware(['permission:agreements.projects.link', 'agreement.site'])->group(function () {
+		Route::post('/agreements/{agreement}/project-links', [AgreementController::class, 'linkProject']);
+		Route::delete('/agreements/{agreement}/project-links/{link}', [AgreementController::class, 'unlinkProject']);
 	});
 
 	/*
@@ -668,15 +622,8 @@ Route::middleware('auth:sanctum')->group(function () {
 	Route::middleware(
 		'permission:agreements.view.own,agreements.view.department,agreements.view.all,agreements.create,agreements.documents.upload,agreements.document-types.manage'
 	)->group(function () {
-		Route::get(
-			'/agreement-document-types',
-			[AgreementDocumentTypeController::class, 'index']
-		);
-
-		Route::get(
-			'/agreement-document-types/{documentType}',
-			[AgreementDocumentTypeController::class, 'show']
-		);
+		Route::get('/agreement-document-types', [AgreementDocumentTypeController::class, 'index']);
+		Route::get('/agreement-document-types/{documentType}', [AgreementDocumentTypeController::class, 'show']);
 	});
 
 	/*
@@ -687,20 +634,9 @@ Route::middleware('auth:sanctum')->group(function () {
 	Route::middleware(
 		'permission:agreements.document-types.manage'
 	)->group(function () {
-		Route::post(
-			'/agreement-document-types',
-			[AgreementDocumentTypeController::class, 'store']
-		);
-
-		Route::put(
-			'/agreement-document-types/{documentType}',
-			[AgreementDocumentTypeController::class, 'update']
-		);
-
-		Route::delete(
-			'/agreement-document-types/{documentType}',
-			[AgreementDocumentTypeController::class, 'destroy']
-		);
+		Route::post('/agreement-document-types', [AgreementDocumentTypeController::class, 'store']);
+		Route::put('/agreement-document-types/{documentType}', [AgreementDocumentTypeController::class, 'update']);
+		Route::delete('/agreement-document-types/{documentType}', [AgreementDocumentTypeController::class, 'destroy']);
 	});
 
 	/*
@@ -708,23 +644,13 @@ Route::middleware('auth:sanctum')->group(function () {
 			| Agreement Document Read / Download
 			|--------------------------------------------------------------------------
 		*/
-	Route::middleware(
-		'permission:agreements.view.own,agreements.view.department,agreements.view.all'
-	)->group(function () {
-		Route::get(
-			'/agreements/{agreement}/documents',
-			[AgreementFileController::class, 'index']
-		);
-
-		Route::get(
-			'/agreements/{agreement}/documents/{agreementFile}',
-			[AgreementFileController::class, 'show']
-		);
-
-		Route::get(
-			'/agreements/{agreement}/documents/{agreementFile}/download',
-			[AgreementFileController::class, 'download']
-		);
+	Route::middleware([
+		'permission:agreements.view.own,agreements.view.department,agreements.view.all',
+		'agreement.site',
+	])->group(function () {
+		Route::get('/agreements/{agreement}/documents', [AgreementFileController::class, 'index']);
+		Route::get('/agreements/{agreement}/documents/{agreementFile}', [AgreementFileController::class, 'show']);
+		Route::get('/agreements/{agreement}/documents/{agreementFile}/download', [AgreementFileController::class, 'download']);
 	});
 
 	/*
@@ -732,23 +658,13 @@ Route::middleware('auth:sanctum')->group(function () {
 			| Agreement Document Upload / Manage
 			|--------------------------------------------------------------------------
 		*/
-	Route::middleware(
-		'permission:agreements.documents.upload'
-	)->group(function () {
-		Route::post(
-			'/agreements/{agreement}/documents',
-			[AgreementFileController::class, 'store']
-		);
-
-		Route::put(
-			'/agreements/{agreement}/documents/{agreementFile}',
-			[AgreementFileController::class, 'update']
-		);
-
-		Route::delete(
-			'/agreements/{agreement}/documents/{agreementFile}',
-			[AgreementFileController::class, 'destroy']
-		);
+	Route::middleware([
+		'permission:agreements.documents.upload',
+		'agreement.site',
+	])->group(function () {
+		Route::post('/agreements/{agreement}/documents', [AgreementFileController::class, 'store']);
+		Route::put('/agreements/{agreement}/documents/{agreementFile}', [AgreementFileController::class, 'update']);
+		Route::delete('/agreements/{agreement}/documents/{agreementFile}', [AgreementFileController::class, 'destroy']);
 	});
 
 	/*
@@ -756,15 +672,12 @@ Route::middleware('auth:sanctum')->group(function () {
 			| Future OCR Request
 			|--------------------------------------------------------------------------
 		*/
-	Route::middleware(
-		'permission:agreements.documents.ocr'
-	)->group(function () {
-		Route::post(
-			'/agreements/{agreement}/documents/{agreementFile}/ocr/request',
-			[AgreementFileController::class, 'requestOcr']
-		);
+	Route::middleware([
+		'permission:agreements.documents.ocr',
+		'agreement.site',
+	])->group(function () {
+		Route::post('/agreements/{agreement}/documents/{agreementFile}/ocr/request', [AgreementFileController::class, 'requestOcr']);
 	});
-
 
 	/*
 		|--------------------------------------------------------------------------

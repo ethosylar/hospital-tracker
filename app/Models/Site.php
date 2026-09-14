@@ -79,13 +79,35 @@ class Site extends Model
         );
     }
 
+    public function agreements()
+    {
+        return $this->hasMany(
+            Agreement::class,
+            'site_id'
+        );
+    }
 
-    /*
-     * Add these relationships only after the next migrations introduce
-     * site_id to the related tables.
-     *
-     * //public function departments() { ... }
-     * //public function projects() { ... }
-     * public function agreements() { ... }
-     */
+    public function externalSources()
+    {
+        return $this->hasMany(
+            ExternalSource::class,
+            'site_id'
+        );
+    }
+
+    public function externalPermits()
+    {
+        return $this->hasMany(
+            ExternalPermit::class,
+            'site_id'
+        );
+    }
+
+    public function integrationSyncRuns()
+    {
+        return $this->hasMany(
+            IntegrationSyncRun::class,
+            'site_id'
+        );
+    }
 }

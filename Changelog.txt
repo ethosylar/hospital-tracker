@@ -28,15 +28,15 @@
 
 Phase 1A  Sites + User-Site Access          ✓ DONE
     ↓
-Phase 1B  Site-aware Departments            ← NEXT
+Phase 1B  Site-aware Departments            ✓ DONE
     ↓
-Phase 1C  Site-aware Projects
+Phase 1C  Site-aware Projects               ✓ DONE
     ↓
-Phase 1D  Site-aware Agreements
+Phase 1D  Site-aware Agreements             ✓ DONE
     ↓
-Phase 1E  Dashboard + Lookup Site Scoping
+Phase 1E  Dashboard + Lookup Site Scoping   ✓ DONE
     ↓
-Phase 1F  SITE_ADMIN + finer permissions
+Phase 1F  SITE_ADMIN + finer permissions    <- PENDING
     ↓
 Phase 2   Project Location
     ↓

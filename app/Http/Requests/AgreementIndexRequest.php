@@ -128,6 +128,12 @@
 			'min:1',
 			'max:100',
             ],
+
+			'site_id' => [
+				'nullable',
+				'integer',
+				'exists:lt_sites,id',
+			],
 			];
 		}
 	}	
