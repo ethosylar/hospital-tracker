@@ -137,32 +137,26 @@ class ProjectController extends Controller
                 'category:id,code,name',
             ])
             ->whereKey($project->id)
-            ->findOrFail($project);
+            ->firstOrFail();
 
-        if (!$project) {
-            return ApiResponse::error(
-                ApiErrorCode::PROJECT_NOT_FOUND,
-                'Project was not found.',
-                [],
-                404
-            );
-        }
+        // if (!$project) {
+        //     return ApiResponse::error(
+        //         ApiErrorCode::PROJECT_NOT_FOUND,
+        //         'Project was not found.',
+        //         [],
+        //         404
+        //     );
+        // }
 
         return new ProjectResource($project);
     }
 
-    public function store(
-        StoreProjectRequest $request
-    ) {
+    public function store(StoreProjectRequest $request)
+    {
         $data = $request->validated();
         $siteId = (int) $data['site_id'];
 
-        if (
-            !ProjectAccess::canManageSite(
-                $request->user(),
-                $siteId
-            )
-        ) {
+        if (!ProjectAccess::canManageSite($request->user(), $siteId)) {
             return ApiResponse::error(
                 ApiErrorCode::PROJECT_SITE_ACCESS_DENIED,
                 'You do not have management access to the selected project site.',
@@ -238,20 +232,11 @@ class ProjectController extends Controller
         }
     }
 
-    public function update(UpdateProjectRequest $request, $project)
+    public function update(UpdateProjectRequest $request, Project $project)
     {
         $project = ProjectAccess::visibleQuery($request->user())
             ->whereKey($project->id)
-            ->findOrFail($project);
-
-        if (!$project) {
-            return ApiResponse::error(
-                ApiErrorCode::PROJECT_NOT_FOUND,
-                'Project was not found.',
-                [],
-                404
-            );
-        }
+            ->firstOrFail();
 
         if (!ProjectAccess::canManage($request->user(), $project)) {
             return ApiResponse::error(
@@ -261,6 +246,7 @@ class ProjectController extends Controller
                 403
             );
         }
+
 
         $data = $request->validated();
 
@@ -373,18 +359,11 @@ class ProjectController extends Controller
         }
     }
 
-    public function destroy(Request $request, $project)
+    public function destroy(Request $request, Project $project)
     {
-        $project = ProjectAccess::visibleQuery($request->user())->find($project);
-
-        if (!$project) {
-            return ApiResponse::error(
-                ApiErrorCode::PROJECT_NOT_FOUND,
-                'Project was not found.',
-                [],
-                404
-            );
-        }
+        $project = ProjectAccess::visibleQuery($request->user())
+            ->whereKey($project->id)
+            ->firstOrFail();
 
         if (!ProjectAccess::canManage($request->user(), $project)) {
             return ApiResponse::error(

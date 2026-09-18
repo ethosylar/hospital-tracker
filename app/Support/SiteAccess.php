@@ -131,16 +131,9 @@ class SiteAccess
             return $query;
         }
 
-        $siteIds = $user
-            ->siteAccesses()
-            ->where('is_active', true)
-            ->whereIn('access_level', ['VIEW', 'MANAGE',])
-            ->pluck('site_id')
-            ->map(fn($id) => (int) $id)
-            ->unique()
-            ->values();
+        $siteIds = self::viewSiteIds($user);
 
-        if ($siteIds->isEmpty()) {
+        if (empty($siteIds)) {
             return $query->whereRaw('1 = 0');
         }
 

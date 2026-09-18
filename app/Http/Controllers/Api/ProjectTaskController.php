@@ -31,7 +31,7 @@ class ProjectTaskController extends Controller
             ])
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->findOrFail();
+            ->get();
 
         $taskIds = $tasks->pluck('id')->map(fn($v) => (int)$v)->all();
         $budgetByTask = $this->budgetSumsForTasks((int)$project, $taskIds);
@@ -106,74 +106,86 @@ class ProjectTaskController extends Controller
     public function update(UpdateProjectTaskRequest $request, ProjectTask $task)
     {
         $user = $request->user();
-        // $t = ProjectTask::findOrFail($task);
 
-        $t = ProjectAccess::visibleQuery($user)
+        $project = ProjectAccess::visibleQuery($user)
             ->whereKey($task->project_id)
             ->firstOrFail();
 
-        if (!ProjectAccess::canManage($user, $t)) {
+        if (!ProjectAccess::canManage($user, $project)) {
             abort(403);
         }
 
         $data = $request->validated();
+
         if (empty($data)) {
-            return response()->json(['ok' => true, 'message' => 'No changes']);
+            return response()->json([
+                'ok' => true,
+                'message' => 'No changes',
+            ]);
         }
 
-        // Ensure parent/depends belong to same project as this task
-        $this->assertMilestoneBelongsToProject((int)$t->project_id, $data);
-        $this->assertSameProjectLinks((int)$t->project_id, $data, (int)$t->id);
+        $this->assertMilestoneBelongsToProject((int) $task->project_id, $data);
+        $this->assertSameProjectLinks((int) $task->project_id, $data, (int) $task->id);
 
-        // normalize
         if (array_key_exists('name', $data)) {
-            $data['name'] = trim((string)$data['name']);
+            $data['name'] = trim((string) $data['name']);
         }
+
         if (array_key_exists('task_color', $data)) {
-            if ($data['task_color'] === null || trim((string)$data['task_color']) === '') {
+            if ($data['task_color'] === null || trim((string) $data['task_color']) === '') {
                 $data['task_color'] = null;
             } else {
-                $c = strtoupper(trim((string)$data['task_color']));
-                if ($c[0] !== '#') $c = '#' . $c;
-                $data['task_color'] = $c;
+                $color = strtoupper(trim((string) $data['task_color']));
+
+                if ($color[0] !== '#') {
+                    $color = '#' . $color;
+                }
+
+                $data['task_color'] = $color;
             }
         }
 
-        // auto duration if not explicitly set AND dates changed
         if (!array_key_exists('duration', $data) && (array_key_exists('start_date', $data) || array_key_exists('end_date', $data))) {
             $nextStart = array_key_exists('start_date', $data)
                 ? $data['start_date']
-                : ($t->start_date?->format('Y-m-d'));
+                : $task->start_date
+                ?->format('Y-m-d');
 
             $nextEnd = array_key_exists('end_date', $data)
                 ? $data['end_date']
-                : ($t->end_date?->format('Y-m-d'));
+                : $task->end_date
+                ?->format('Y-m-d');
 
             $data['duration'] = $this->calcDuration($nextStart, $nextEnd);
         }
 
-        $old = $t->getOriginal();
+        $old = $task->getOriginal();
 
-        $t->fill($data);
+        $task->fill($data);
 
-        if (!$t->isDirty()) {
-            return response()->json(['ok' => true, 'message' => 'No changes']);
+        if (!$task->isDirty()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'No changes',
+            ]);
         }
 
-        $dirty = $t->getDirty();
-        $t->save();
+        $dirty = $task->getDirty();
+        $task->save();
 
         $changes = \App\Support\AuditDiff::diff($old, $dirty);
 
         \App\Support\Audit::log(
             $request->user()->id,
             'TASK',
-            (int)$t->id,
+            (int) $task->id,
             'UPDATE',
             $changes
         );
 
-        return response()->json(['ok' => true]);
+        return response()->json([
+            'ok' => true,
+        ]);
     }
 
     public function destroy(Request $request, $task)
