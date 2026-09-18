@@ -4,247 +4,261 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Rules\BelongsToSite;
+use App\Rules\UserHasSiteAccess;
 
 class UpdateAgreementRequest extends FormRequest
 {
-	public function authorize(): bool
-	{
-		return true;
-	}
+    public function authorize(): bool
+    {
+        return true;
+    }
 
-	protected function prepareForValidation(): void
-	{
-		$data = [];
+    protected function prepareForValidation(): void
+    {
+        $data = [];
 
-		foreach (['agreement_no', 'title', 'description', 'purpose', 'scope', 'currency_code',] as $field) {
-			if (!$this->has($field)) {
-				continue;
-			}
+        foreach (['agreement_no', 'title', 'description', 'purpose', 'scope', 'currency_code',] as $field) {
+            if (!$this->has($field)) {
+                continue;
+            }
 
-			if ($this->input($field) === null) {
-				$data[$field] = null;
-				continue;
-			}
+            if ($this->input($field) === null) {
+                $data[$field] = null;
+                continue;
+            }
 
-			$value = trim((string) $this->input($field));
+            $value = trim((string) $this->input($field));
 
-			$data[$field] = $value === '' ? null : $value;
-		}
+            $data[$field] = $value === '' ? null : $value;
+        }
 
-		if (!empty($data['agreement_no'])) {
-			$data['agreement_no'] = strtoupper(
-				$data['agreement_no']
-			);
-		}
+        if (!empty($data['agreement_no'])) {
+            $data['agreement_no'] = strtoupper(
+                $data['agreement_no']
+            );
+        }
 
-		if (!empty($data['currency_code'])) {
-			$data['currency_code'] = strtoupper(
-				$data['currency_code']
-			);
-		}
+        if (!empty($data['currency_code'])) {
+            $data['currency_code'] = strtoupper(
+                $data['currency_code']
+            );
+        }
 
-		if (!empty($data)) {
-			$this->merge($data);
-		}
-	}
+        if (!empty($data)) {
+            $this->merge($data);
+        }
+    }
 
-	public function rules(): array
-	{
-		$agreement = $this->route('agreement');
+    public function rules(): array
+    {
+        $agreement = $this->route('agreement');
 
-		$agreementId = is_object($agreement) ? $agreement->id : $agreement;
-		/*
+        $agreementId = is_object($agreement) ? $agreement->id : $agreement;
+        /*
          * Site used for the candidate uniqueness check:
          *
          * - incoming site_id when moving Agreement
          * - otherwise Agreement's current Site
          */
-		$candidateSiteId = $this->has(
-			'site_id'
-		)
-			? (int) $this->input('site_id')
-			: (
-				is_object($agreement)
-				? (int) $agreement->site_id
-				: 0
-			);
+        $candidateSiteId = $this->has(
+            'site_id'
+        )
+            ? (int) $this->input('site_id')
+            : (
+                is_object($agreement)
+                ? (int) $agreement->site_id
+                : 0
+            );
 
-		return [
-			'site_id' => [
-				'sometimes',
-				'required',
-				'integer',
+        return [
+            'site_id' => [
+                'sometimes',
+                'required',
+                'integer',
 
-				Rule::exists(
-					'lt_sites',
-					'id'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'is_active',
-						true
-					)
-				),
-			],
+                Rule::exists(
+                    'lt_sites',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where(
+                        'is_active',
+                        true
+                    )
+                ),
+            ],
 
-			'agreement_no' => [
-				'sometimes',
-				'required',
-				'string',
-				'max:80',
-				'regex:/^[A-Z0-9][A-Z0-9_\/-]*$/',
+            'agreement_no' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:80',
+                'regex:/^[A-Z0-9][A-Z0-9_\/-]*$/',
 
-				Rule::unique(
-					'dt_agreements',
-					'agreement_no'
-				)
-					->where(
-						fn($query) =>
-						$query->where(
-							'site_id',
-							$candidateSiteId
-						)
-					)
-					->ignore(
-						$agreementId
-					),
-			],
+                Rule::unique(
+                    'dt_agreements',
+                    'agreement_no'
+                )
+                    ->where(
+                        fn($query) =>
+                        $query->where(
+                            'site_id',
+                            $candidateSiteId
+                        )
+                    )
+                    ->ignore(
+                        $agreementId
+                    ),
+            ],
 
-			'title' => [
-				'sometimes',
-				'required',
-				'string',
-				'max:255',
-			],
+            'title' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+            ],
 
-			'department_id' => [
-				'sometimes',
-				'required',
-				'integer',
-				'exists:lt_departments,id',
-			],
+            'department_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                'exists:lt_departments,id',
 
-			'owner_user_id' => [
-				'sometimes',
-				'required',
-				'integer',
-				'exists:users,id',
-			],
+                new BelongsToSite(
+                    table: 'lt_departments',
 
-			'counterparty_id' => [
-				'sometimes',
-				'required',
-				'integer',
+                    siteId: $candidateSiteId,
 
-				Rule::exists(
-					'dt_counterparties',
-					'id'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'is_active',
-						true
-					)
-				),
-			],
+                    requireActive: true
+                ),
+            ],
 
-			'agreement_category_id' => [
-				'sometimes',
-				'required',
-				'integer',
+            'owner_user_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                'exists:users,id',
 
-				Rule::exists(
-					'lt_agreement_categories',
-					'id'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'is_active',
-						true
-					)
-				),
-			],
+                new UserHasSiteAccess(
+                    $candidateSiteId
+                ),
+            ],
 
-			'agreement_type_id' => [
-				'sometimes',
-				'nullable',
-				'integer',
+            'counterparty_id' => [
+                'sometimes',
+                'required',
+                'integer',
 
-				Rule::exists(
-					'lt_agreement_types',
-					'id'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'is_active',
-						true
-					)
-				),
-			],
+                Rule::exists(
+                    'dt_counterparties',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where(
+                        'is_active',
+                        true
+                    )
+                ),
+            ],
 
-			'description' => [
-				'sometimes',
-				'nullable',
-				'string',
-			],
+            'agreement_category_id' => [
+                'sometimes',
+                'required',
+                'integer',
 
-			'purpose' => [
-				'sometimes',
-				'nullable',
-				'string',
-			],
+                Rule::exists(
+                    'lt_agreement_categories',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where(
+                        'is_active',
+                        true
+                    )
+                ),
+            ],
 
-			'scope' => [
-				'sometimes',
-				'nullable',
-				'string',
-			],
+            'agreement_type_id' => [
+                'sometimes',
+                'nullable',
+                'integer',
 
-			'effective_date' => [
-				'sometimes',
-				'nullable',
-				'date',
-			],
+                Rule::exists(
+                    'lt_agreement_types',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where(
+                        'is_active',
+                        true
+                    )
+                ),
+            ],
 
-			'expiry_date' => [
-				'sometimes',
-				'nullable',
-				'date',
-			],
+            'description' => [
+                'sometimes',
+                'nullable',
+                'string',
+            ],
 
-			'signed_date' => [
-				'sometimes',
-				'nullable',
-				'date',
-			],
+            'purpose' => [
+                'sometimes',
+                'nullable',
+                'string',
+            ],
 
-			'notice_period_days' => [
-				'sometimes',
-				'nullable',
-				'integer',
-				'min:0',
-				'max:3650',
-			],
+            'scope' => [
+                'sometimes',
+                'nullable',
+                'string',
+            ],
 
-			'auto_renewal' => [
-				'sometimes',
-				'boolean',
-			],
+            'effective_date' => [
+                'sometimes',
+                'nullable',
+                'date',
+            ],
 
-			'contract_value' => [
-				'sometimes',
-				'nullable',
-				'numeric',
-				'min:0',
-			],
+            'expiry_date' => [
+                'sometimes',
+                'nullable',
+                'date',
+            ],
 
-			'currency_code' => [
-				'sometimes',
-				'required',
-				'string',
-				'size:3',
-				'regex:/^[A-Z]{3}$/',
-			],
-		];
-	}
+            'signed_date' => [
+                'sometimes',
+                'nullable',
+                'date',
+            ],
+
+            'notice_period_days' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                'min:0',
+                'max:3650',
+            ],
+
+            'auto_renewal' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'contract_value' => [
+                'sometimes',
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'currency_code' => [
+                'sometimes',
+                'required',
+                'string',
+                'size:3',
+                'regex:/^[A-Z]{3}$/',
+            ],
+        ];
+    }
 }

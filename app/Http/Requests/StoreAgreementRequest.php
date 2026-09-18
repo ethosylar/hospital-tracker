@@ -4,205 +4,137 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Rules\BelongsToSite;
+use App\Rules\UserHasSiteAccess;
 
 class StoreAgreementRequest extends FormRequest
 {
-	public function authorize(): bool
-	{
-		return true;
-	}
+    public function authorize(): bool
+    {
+        return true;
+    }
 
-	protected function prepareForValidation(): void
-	{
-		$data = [];
+    protected function prepareForValidation(): void
+    {
+        $data = [];
 
-		foreach (['agreement_no', 'title', 'description', 'purpose', 'scope', 'currency_code',] as $field) {
-			if (!$this->has($field)) {
-				continue;
-			}
+        foreach (['agreement_no', 'title', 'description', 'purpose', 'scope', 'currency_code',] as $field) {
+            if (!$this->has($field)) {
+                continue;
+            }
 
-			if ($this->input($field) === null) {
-				$data[$field] = null;
-				continue;
-			}
+            if ($this->input($field) === null) {
+                $data[$field] = null;
+                continue;
+            }
 
-			$value = trim((string) $this->input($field));
+            $value = trim((string) $this->input($field));
 
-			$data[$field] = $value === '' ? null : $value;
-		}
+            $data[$field] = $value === '' ? null : $value;
+        }
 
-		if (!empty($data['agreement_no'])) {
-			$data['agreement_no'] = strtoupper($data['agreement_no']);
-		}
+        if (!empty($data['agreement_no'])) {
+            $data['agreement_no'] = strtoupper($data['agreement_no']);
+        }
 
-		if (!empty($data['currency_code'])) {
-			$data['currency_code'] = strtoupper($data['currency_code']);
-		}
+        if (!empty($data['currency_code'])) {
+            $data['currency_code'] = strtoupper($data['currency_code']);
+        }
 
-		if (!empty($data)) {
-			$this->merge($data);
-		}
-	}
+        if (!empty($data)) {
+            $this->merge($data);
+        }
+    }
 
-	public function rules(): array
-	{
-		$siteId = (int) $this->input('site_id');
+    public function rules(): array
+    {
+        $siteId = (int) $this->input('site_id');
 
-		return [
-			'site_id' => [
-				'required',
-				'integer',
-				Rule::exists(
-					'lt_sites',
-					'id'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'is_active',
-						true
-					)
-				),
-			],
+        return [
+            'site_id' => [
+                'required',
+                'integer',
+                Rule::exists(
+                    'lt_sites',
+                    'id'
+                )->where(
+                    fn($query) => $query->where('is_active', true)
+                ),
+            ],
 
-			'agreement_no' => [
-				'nullable',
-				'string',
-				'max:80',
-				'regex:/^[A-Z0-9][A-Z0-9_\/-]*$/',
+            'agreement_no' => [
+                'nullable',
+                'string',
+                'max:80',
+                'regex:/^[A-Z0-9][A-Z0-9_\/-]*$/',
+                Rule::unique(
+                    'dt_agreements',
+                    'agreement_no'
+                )->where(
+                    fn($query) => $query->where('site_id', $siteId)
+                ),
+            ],
 
-				Rule::unique(
-					'dt_agreements',
-					'agreement_no'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'site_id',
-						$siteId
-					)
-				),
-			],
+            'title' => ['required', 'string', 'max:255',],
+            'department_id' => [
+                'required',
+                'integer',
+                'exists:lt_departments,id',
+                new BelongsToSite(table: 'lt_departments', siteId: $siteId, requireActive: true),
+            ],
+            'owner_user_id' => [
+                'required',
+                'integer',
+                'exists:users,id',
+                new UserHasSiteAccess($siteId),
+            ],
 
-			'title' => [
-				'required',
-				'string',
-				'max:255',
-			],
+            'counterparty_id' => [
+                'required',
+                'integer',
+                Rule::exists(
+                    'dt_counterparties',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where('is_active', true)
+                ),
+            ],
 
-			'department_id' => [
-				'required',
-				'integer',
-				'exists:lt_departments,id',
-			],
+            'agreement_category_id' => [
+                'required',
+                'integer',
+                Rule::exists(
+                    'lt_agreement_categories',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where('is_active', true)
+                ),
+            ],
 
-			'owner_user_id' => [
-				'required',
-				'integer',
-				'exists:users,id',
-			],
+            'agreement_type_id' => [
+                'nullable',
+                'integer',
+                Rule::exists(
+                    'lt_agreement_types',
+                    'id'
+                )->where(
+                    fn($query) =>
+                    $query->where('is_active', true)
+                ),
+            ],
 
-			'counterparty_id' => [
-				'required',
-				'integer',
-
-				Rule::exists(
-					'dt_counterparties',
-					'id'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'is_active',
-						true
-					)
-				),
-			],
-
-			'agreement_category_id' => [
-				'required',
-				'integer',
-
-				Rule::exists(
-					'lt_agreement_categories',
-					'id'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'is_active',
-						true
-					)
-				),
-			],
-
-			'agreement_type_id' => [
-				'nullable',
-				'integer',
-
-				Rule::exists(
-					'lt_agreement_types',
-					'id'
-				)->where(
-					fn($query) =>
-					$query->where(
-						'is_active',
-						true
-					)
-				),
-			],
-
-			'description' => [
-				'nullable',
-				'string',
-			],
-
-			'purpose' => [
-				'nullable',
-				'string',
-			],
-
-			'scope' => [
-				'nullable',
-				'string',
-			],
-
-			'effective_date' => [
-				'nullable',
-				'date',
-			],
-
-			'expiry_date' => [
-				'nullable',
-				'date',
-				'after_or_equal:effective_date',
-			],
-
-			'signed_date' => [
-				'nullable',
-				'date',
-			],
-
-			'notice_period_days' => [
-				'nullable',
-				'integer',
-				'min:0',
-				'max:3650',
-			],
-
-			'auto_renewal' => [
-				'nullable',
-				'boolean',
-			],
-
-			'contract_value' => [
-				'nullable',
-				'numeric',
-				'min:0',
-			],
-
-			'currency_code' => [
-				'nullable',
-				'string',
-				'size:3',
-				'regex:/^[A-Z]{3}$/',
-			],
-		];
-	}
+            'description' => ['nullable', 'string',],
+            'purpose' => ['nullable', 'string',],
+            'scope' => ['nullable', 'string',],
+            'effective_date' => ['nullable', 'date',],
+            'expiry_date' => ['nullable', 'date', 'after_or_equal:effective_date',],
+            'signed_date' => ['nullable', 'date',],
+            'notice_period_days' => ['nullable', 'integer', 'min:0', 'max:3650',],
+            'auto_renewal' => ['nullable', 'boolean',],
+            'contract_value' => ['nullable', 'numeric', 'min:0',],
+            'currency_code' => ['nullable', 'string', 'size:3', 'regex:/^[A-Z]{3}$/',],
+        ];
+    }
 }

@@ -17,6 +17,19 @@ class StoredFileResource extends JsonResource
 
             'disk' => $this->disk,
             'path' => $this->path,
+            'site_id' => (int) $this->site_id,
+
+            'site' => $this->whenLoaded(
+                'site',
+                fn() =>
+                $this->site
+                    ? [
+                        'id' => (int) $this->site->id,
+                        'code' => $this->site->code,
+                        'name' => $this->site->name,
+                        'short_name' => $this->site->short_name,
+                    ] : null
+            ),
 
             'uploaded_by_user_id' => $this->uploaded_by_user_id ? (int)$this->uploaded_by_user_id : null,
             'created_at' => $this->created_at,

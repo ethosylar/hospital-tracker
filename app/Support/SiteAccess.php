@@ -63,54 +63,44 @@ class SiteAccess
                 ->all();
         }
 
-        return self::siteIdsForLevels(
-            $user,
-            [self::LEVEL_ADMIN]
-        );
+        return self::siteIdsForLevels($user, [self::LEVEL_ADMIN]);
     }
 
-    public static function canViewSite(
-        User $user,
-        int|Site $site
-    ): bool {
+    public static function canViewSite(User $user, int $siteId): bool
+    {
         if ($user->hasPermission('system.all')) {
             return true;
         }
 
-        $siteId = $site instanceof Site
-            ? (int) $site->id
-            : (int) $site;
-
-        return in_array($siteId, self::viewSiteIds($user), true);
+        return $user
+            ->siteAccesses()
+            ->where('site_id', $siteId)
+            ->where('is_active', true)
+            ->whereIn('access_level', ['VIEW', 'MANAGE',])
+            ->exists();
     }
 
-    public static function canManageSite(
-        User $user,
-        int|Site $site
-    ): bool {
+    public static function canManageSite(User $user, int $siteId): bool
+    {
         if ($user->hasPermission('system.all')) {
             return true;
         }
 
-        $siteId = $site instanceof Site
-            ? (int) $site->id
-            : (int) $site;
-
-        return in_array($siteId, self::manageSiteIds($user), true);
+        return $user
+            ->siteAccesses()
+            ->where('site_id', $siteId)
+            ->where('is_active', true)
+            ->where('access_level', 'MANAGE')
+            ->exists();
     }
 
-    public static function canAdminSite(
-        User $user,
-        int|Site $site
-    ): bool {
+    public static function canAdminSite(User $user, int|Site $site): bool
+    {
         if ($user->hasPermission('system.all')) {
             return true;
         }
 
-        $siteId = $site instanceof Site
-            ? (int) $site->id
-            : (int) $site;
-
+        $siteId = $site instanceof Site ? (int) $site->id : (int) $site;
         return in_array($siteId, self::adminSiteIds($user), true);
     }
 
@@ -120,29 +110,45 @@ class SiteAccess
      * SiteAccess::applyViewScope($query, $request->user());
      * SiteAccess::applyViewScope($query, $request->user(), 'dt_projects.site_id');
      */
-    public static function applyViewScope(
-        Builder $query,
-        User $user,
-        string $column = 'site_id'
-    ): Builder {
+    // public static function applyViewScope(Builder $query, User $user, string $column = 'site_id'): Builder
+    // {
+    //     if ($user->hasPermission('system.all')) {
+    //         return $query;
+    //     }
+
+    //     $siteIds = self::viewSiteIds($user);
+
+    //     if (empty($siteIds)) {
+    //         return $query->whereRaw('1 = 0');
+    //     }
+
+    //     return $query->whereIn($column, $siteIds);
+    // }
+
+    public static function applyViewScope(Builder $query, User $user, string $column = 'site_id'): Builder
+    {
         if ($user->hasPermission('system.all')) {
             return $query;
         }
 
-        $siteIds = self::viewSiteIds($user);
+        $siteIds = $user
+            ->siteAccesses()
+            ->where('is_active', true)
+            ->whereIn('access_level', ['VIEW', 'MANAGE',])
+            ->pluck('site_id')
+            ->map(fn($id) => (int) $id)
+            ->unique()
+            ->values();
 
-        if (empty($siteIds)) {
+        if ($siteIds->isEmpty()) {
             return $query->whereRaw('1 = 0');
         }
 
         return $query->whereIn($column, $siteIds);
     }
 
-    public static function applyManageScope(
-        Builder $query,
-        User $user,
-        string $column = 'site_id'
-    ): Builder {
+    public static function applyManageScope(Builder $query, User $user, string $column = 'site_id'): Builder
+    {
         if ($user->hasPermission('system.all')) {
             return $query;
         }
@@ -156,10 +162,8 @@ class SiteAccess
         return $query->whereIn($column, $siteIds);
     }
 
-    private static function siteIdsForLevels(
-        User $user,
-        array $levels
-    ): array {
+    private static function siteIdsForLevels(User $user, array $levels): array
+    {
         return UserSite::query()
             ->where('user_id', $user->id)
             ->where('is_active', true)

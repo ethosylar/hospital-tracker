@@ -44,4 +44,12 @@ class ExternalSource extends Model
 			'external_source_id'
 		);
 	}
+
+	public function riskIssues()
+	{
+		return $this->hasMany(
+			ExternalRiskIssue::class,
+			'external_source_id'
+		);
+	}
 }

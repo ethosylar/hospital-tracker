@@ -10,7 +10,7 @@ class SiteSeeder extends Seeder
     public function run(): void
     {
         $site = Site::query()->firstOrCreate(
-            ['code' => 'KLGSH'],
+            ['code' => 'KLG'],
             [
                 'name' => 'KPJ Klang Specialist Hospital',
                 'short_name' => 'KPJ Klang',

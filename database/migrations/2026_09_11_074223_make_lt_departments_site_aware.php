@@ -15,13 +15,71 @@ return new class extends Migration
             );
         }
 
-        $defaultSiteId = DB::table('lt_sites')
-            ->where('code', 'KLG')
-            ->value('id');
+        // $defaultSiteId = DB::table('lt_sites')
+        //     ->where('code', 'KLG')
+        //     ->value('id');
+
+        // if (!$defaultSiteId) {
+        //     throw new \RuntimeException(
+        //         'Default site KLG was not found. Run SiteSeeder before this migration.'
+        //     );
+        // }
+
+        /*
+|--------------------------------------------------------------------------
+| Ensure legacy/default KLG Site exists
+|--------------------------------------------------------------------------
+|
+| KLG is required by this migration because existing HPMS Departments
+| must be assigned to a Site before site_id becomes NOT NULL.
+|
+| Do NOT depend on SiteSeeder here.
+|
+| Laravel runs migrations BEFORE seeders during:
+|
+| php artisan migrate:fresh --seed
+|
+*/
+
+        $defaultSiteId = DB::table('lt_sites')->where('code', 'KLG')->value('id');
+
+        if (!$defaultSiteId) {
+            $siteData = ['code' => 'KLG',];
+
+            if (Schema::hasColumn('lt_sites', 'name')) {
+                $siteData['name'] = 'KPJ Klang Specialist Hospital';
+            }
+
+            if (Schema::hasColumn('lt_sites', 'short_name')) {
+                $siteData['short_name'] = 'KPJ Klang';
+            }
+
+            if (Schema::hasColumn('lt_sites', 'site_type')) {
+                $siteData['site_type'] = 'HOSPITAL';
+            }
+
+            if (Schema::hasColumn('lt_sites', 'is_active')) {
+                $siteData['is_active'] = true;
+            }
+
+            if (Schema::hasColumn('lt_sites', 'created_at')) {
+                $siteData['created_at'] = now();
+            }
+
+            if (Schema::hasColumn('lt_sites', 'updated_at')) {
+                $siteData['updated_at'] = now();
+            }
+
+            DB::table('lt_sites')->insert($siteData);
+
+            $defaultSiteId = DB::table('lt_sites')
+                ->where('code', 'KLG')
+                ->value('id');
+        }
 
         if (!$defaultSiteId) {
             throw new \RuntimeException(
-                'Default site KLG was not found. Run SiteSeeder before this migration.'
+                'Unable to create or resolve the default KLG Site.'
             );
         }
 

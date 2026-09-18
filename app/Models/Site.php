@@ -110,4 +110,28 @@ class Site extends Model
             'site_id'
         );
     }
+
+    public function externalRiskIssues()
+    {
+        return $this->hasMany(
+            ExternalRiskIssue::class,
+            'site_id'
+        );
+    }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(
+            AuditLog::class,
+            'site_id'
+        );
+    }
+
+    public function files()
+    {
+        return $this->hasMany(
+            StoredFile::class,
+            'site_id'
+        );
+    }
 }

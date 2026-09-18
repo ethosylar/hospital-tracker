@@ -26,20 +26,67 @@
 | AI-01   | Local HPMS AI assistant               | Future   |        |
 
 
-Phase 1A  Sites + User-Site Access          ✓ DONE
+Phase 1A  Sites + User-Site Access                          ✓ DONE
     ↓
-Phase 1B  Site-aware Departments            ✓ DONE
+Phase 1B  Site-aware Departments                            ✓ DONE
     ↓
-Phase 1C  Site-aware Projects               ✓ DONE
+Phase 1C  Site-aware Projects                               ✓ DONE
     ↓
-Phase 1D  Site-aware Agreements             ✓ DONE
+Phase 1D  Site-aware Agreements                             ✓ DONE
     ↓
-Phase 1E  Dashboard + Lookup Site Scoping   ✓ DONE
+Phase 1E  Site-aware ePTW / External Permit                 ✓ DONE
     ↓
-Phase 1F  SITE_ADMIN + finer permissions    <- PENDING
+Phase 1F  Site-aware External Risks/Issues                  ✓ DONE
+    ↓
+Phase 1G  Site-aware Audit Logs                             ✓ DONE
+    ↓
+Phase 1H  Site-aware File Ownership & File-Link Integrity   ✓ DONE
+    ↓
+Phase 1I  Multi-Site Backend Hardening / Lookups            ✓ DONEs
+    ↓
+Phase 1J  Automated Multi-Site Feature Tests                <- PENDING
+    ↓
+Phase 1K  SITE_ADMIN + finer permissions
     ↓
 Phase 2   Project Location
     ↓
 Phase 3   Project Vendors / Vendor Users
     ↓
 Phase 4   Financial Tracking
+
+
+Phase A — Foundation
+Multi-Site
+User-Site assignment
+Site Admin
+Site-aware Departments
+Site-aware Projects
+Site-aware Agreements
+Permission refinement
+Cross-site access rules
+Project Location
+Searchable dropdowns
+
+Phase B — Collaboration
+Counterparty → Project Vendor
+Multiple vendors per project
+Vendor users
+Vendor project assignment
+Vendor dashboard
+Department project accounts
+Restricted project updates
+Vendor/Department update submissions
+PM/PMO review workflow
+Financial tracking entries
+
+Phase C — Intelligence / Reporting
+Vendor Performance Dashboard
+Cross-site reporting
+Data Quality Dashboard
+Stale-data alerts
+Import
+Export
+Site comparison
+Vendor evaluation
+Project health analytics
+Local AI

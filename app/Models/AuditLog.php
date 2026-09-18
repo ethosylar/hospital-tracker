@@ -9,25 +9,37 @@ class AuditLog extends Model
     protected $table = 'dt_audit_logs';
 
     protected $fillable = [
+        'site_id',
         'entity_type',
         'entity_id',
         'action',
-        'source',
-        'performed_by_user_id',
-        'performed_at',
         'changes',
+        'performed_by_user_id',
+        'source',
+        'performed_at',
     ];
 
     protected $casts = [
+        'site_id' => 'integer',
         'entity_id' => 'integer',
         'performed_by_user_id' => 'integer',
+        'changes' => 'array',
         'performed_at' => 'datetime',
-        // If changes column is JSON type, you can cast as array:
-        // 'changes' => 'array',
     ];
+
+    public function site()
+    {
+        return $this->belongsTo(
+            Site::class,
+            'site_id'
+        );
+    }
 
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class, 'performed_by_user_id');
+        return $this->belongsTo(
+            User::class,
+            'performed_by_user_id'
+        );
     }
 }

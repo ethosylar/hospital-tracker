@@ -18,29 +18,10 @@ class ExternalSourceController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'site_id' => [
-                'nullable',
-                'integer',
-                'exists:lt_sites,id',
-            ],
-
-            'is_active' => [
-                'nullable',
-                'boolean',
-            ],
-
-            'search' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
-            'per_page' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:100',
-            ],
+            'site_id' => ['nullable','integer','exists:lt_sites,id',],
+            'is_active' => ['nullable','boolean',],
+            'search' => ['nullable','string','max:255',],
+            'per_page' => ['nullable','integer','min:1','max:100',],
         ]);
 
         $query = ExternalSource::query()->with(['site:id,code,name,short_name',]);
@@ -168,10 +149,10 @@ class ExternalSourceController extends Controller
              * Once the source owns synchronized records,
              * its Site becomes immutable.
              */
-            if ($source->permits()->exists() || $source->syncRuns()->exists()) {
+            if ($source->permits()->exists() || $source->syncRuns()->exists() || $source->riskIssues()->exists()) {
                 return ApiResponse::error(
                     ApiErrorCode::EXTERNAL_SOURCE_SITE_LOCKED,
-                    'The External Source Site cannot be changed after permits or sync history exist.',
+                    'The External Source Site cannot be changed after dependent records exist.',
                     [],
                     422
                 );
