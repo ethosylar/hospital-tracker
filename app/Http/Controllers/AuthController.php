@@ -1,13 +1,13 @@
 <?php
-	
+
 	namespace App\Http\Controllers;
-	
+
 	use App\Models\User;
 	use App\Support\Audit;
 	use Illuminate\Http\Request;
 	use Illuminate\Support\Facades\Hash;
 	use Illuminate\Validation\ValidationException;
-	
+
 	class AuthController extends Controller
 	{
 		public function login(Request $request)
@@ -16,25 +16,25 @@
             'login' => ['required', 'string'],
             'password' => ['required', 'string'],
 			]);
-			
+
 			$login = trim($request->login);
-			
+
 			$user = User::query()
             ->where('email', $login)
             ->orWhere('username', $login)
             ->first();
-			
+
 			if (!$user || !Hash::check($request->password, $user->password)) {
 				throw ValidationException::withMessages([
                 'login' => ['Invalid credentials.'],
 				]);
 			}
-			
+
 			// Optional: only allow one active token per user
 			$user->tokens()->delete();
-			
+
 			$token = $user->createToken('angular')->plainTextToken;
-			
+
 			Audit::log(
 			(int) $user->id,
 			'AUTH',
@@ -46,25 +46,25 @@
 			'user_agent' => $request->userAgent(),
 			]
 			);
-			
+
 			return response()->json([
             'token' => $token,
             ...$this->authPayload($user),
 			]);
 		}
-		
+
 		public function me(Request $request)
 		{
 			return response()->json(
             $this->authPayload($request->user())
 			);
 		}
-		
+
 		public function logout(Request $request)
 		{
 			$user = $request->user();
 			$token = $user?->currentAccessToken();
-			
+
 			if ($user) {
 				Audit::log(
 				(int) $user->id,
@@ -79,19 +79,19 @@
 				]
 				);
 			}
-			
+
 			$token?->delete();
-			
+
 			return response()->json([
 			'ok' => true,
 			]);
 		}
-		
+
 		private function authPayload(User $user): array
 		{
 			$user->load([
             'department:id,code,name',
-			
+
             'roles' => function ($q) {
                 $q->select(
 				'lt_roles.id',
@@ -99,7 +99,7 @@
 				'lt_roles.name'
                 );
 			},
-			
+
             'roles.permissions' => function ($q) {
                 $q->select(
 				'lt_permissions.id',
@@ -145,31 +145,32 @@
 					])
 					->values(),
 			];
-			
+
 			foreach ($user->roles as $role) {
 				$role->makeHidden('pivot');
-				
+
 				foreach ($role->permissions as $permission) {
 					$permission->makeHidden('pivot');
 				}
 			}
-			
+
 			$roles = $user->roles
             ->pluck('code')
             ->unique()
             ->values();
-			
+
 			$permissions = $user->roles
             ->flatMap(fn ($role) => $role->permissions)
             ->where('is_active', true)
             ->pluck('code')
             ->unique()
             ->values();
-			
+
 			return [
             'user' => $user,
             'roles' => $roles,
             'permissions' => $permissions,
+            ...$siteFields,
 			];
 		}
-	}			
+	}

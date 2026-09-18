@@ -42,9 +42,9 @@ Phase 1G  Site-aware Audit Logs                             ✓ DONE
     ↓
 Phase 1H  Site-aware File Ownership & File-Link Integrity   ✓ DONE
     ↓
-Phase 1I  Multi-Site Backend Hardening / Lookups            ✓ DONEs
+Phase 1I  Multi-Site Backend Hardening / Lookups            ✓ DONE
     ↓
-Phase 1J  Automated Multi-Site Feature Tests                <- PENDING
+Phase 1J  Automated Multi-Site Feature Tests                ✓ DONE
     ↓
 Phase 1K  SITE_ADMIN + finer permissions
     ↓
@@ -90,3 +90,18 @@ Site comparison
 Vendor evaluation
 Project health analytics
 Local AI
+
+
+Phase 2A	Site Context + global Site selector                 <- PENDING
+    ↓
+Phase 2B	Projects / Tasks / Milestones / Budget / Files
+    ↓
+Phase 2C	Agreements + Agreement documents
+    ↓
+Phase 2D	ePTW Permits + sync
+    ↓
+Phase 2E	External Risks / Issues
+    ↓
+Phase 2F	Audit Logs + Admin Site/User Site Access
+    ↓
+Phase 2G	Dashboard Site filtering
